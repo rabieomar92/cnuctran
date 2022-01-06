@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+
+<problem>
+
+  <!-- Calculation zones. -->
+	<zone name="myzone">
+		<!--
+			 ZONE DEFINITIONS.
+			 
+			 Each zone has its own problem definition. For instance, a reactor fuel pin can be considered as
+			 a zone. Users are allowed to define as many zones as they wish.
+	
+		-->
+		<species source=".\chain_endfb71.xml" amin="150" amax="250"></species>
+		<initial_concentrations>
+			<w0 species="U238">1.0</w0>
+		</initial_concentrations>
+		<reaction_rates>
+			<reaction species="U238" type="(n,gamma)">1e-4</reaction>
+			<reaction species="U238" type="fission">1e-5</reaction>
+		</reaction_rates>
+	</zone>
+
+  <!-- Simulation parameters. -->
+	<simulation_params>
+		<!-- 
+		
+			 SIMULATION PARAMETERS DESCRIPTION.
+			 
+			 n is the order of the calculation. This simply means that the substep size is below 10^-n sec.
+			 time_step is the time step of the calculation.
+			 precision_digits is the minimum number of accurate digits maintained in the arithmetics.
+			 output_digits is the number of decimal points to be displayed in the output.
+			 verbosity is the verbosity level. A higher verbosity means more console output messages will be displayed.
+			 output is the location of the output file on the disk.
+			 max_rate is the maximum removal rate to be considered in the calculation.*
+			 min_rate is the minimum removal rate to be considered in the calculation.**
+			 
+			 *Any removal rates that fall above max_rate will be ignored by the program.
+			 **Any removal rates that fall below min_rate will be ignored by the program.
+			 
+		-->
+		<n>12</n>
+		<time_step>1e+12</time_step>
+		<precision_digits>40</precision_digits>
+		<output_digits>15</output_digits>
+		<verbosity>1</verbosity>
+		<output>.\output.xml</output>
+		<max_rate>1e0</max_rate>
+		<min_rate>1e-200</min_rate>
+	</simulation_params>
+</problem>
