@@ -1,4 +1,4 @@
-# CNUCTRAN: A Probabilistic Solver for Nuclear Transmutation Problems.
+# CNUCTRAN: A C++ Probabilistic Solver for Nuclear Transmutation Problems.
 
 <div align="justify">
 CNUCTRAN is a C++ library created to simulate various nuclear transmutations such as decays, fissions, and neutron absorptions. The code helps physicists avoid cumbersome numerical issues of solving the nuclide depletion equations (also known as the Bateman's equations). These issues include the stiffness of the Bateman's equations due to the complex decay chain problems. The Bateman's equation of a depletion problem is given as follows:
