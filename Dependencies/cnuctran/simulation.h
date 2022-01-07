@@ -52,8 +52,8 @@ namespace cnuctran {
             xml_parse_result open_success = file.load_file(xml_data_location.c_str());
             if (!open_success)
             {
-                cout << "ERROR <cnuctran::depletion_scheme::build_chains(...)> Fail retrieving data from " << xml_data_location << "." << endl;
-                return;
+                cout << "fatal-error <cnuctran::depletion_scheme::build_chains(...)> Fail retrieving data from " << xml_data_location << "." << endl;
+                exit(0);
             }
 
 //..........Unpack the XML root.
