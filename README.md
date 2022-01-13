@@ -136,3 +136,81 @@ where c<sub><i>i</i></sub> is the normalization constant and δ<sub><i>jl</i></s
 
 <img src="https://latex.codecogs.com/svg.latex?c_i&space;=&space;\left&space;(&space;\sum_{l=0}^{J_i}&space;\widetilde{\pi}_{il}&space;\right&space;)^{-1}" title="c_i = \left ( \sum_{l=0}^{J_i} \widetilde{\pi}_l \right )^{-1}" />
 
+## Input Example.
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<problem>
+	<!-- Calculation zones. -->
+	<zone name="myzone">
+		<!--
+			 ZONE DEFINITIONS.
+			 
+			 Each zone has its own problem definition. For instance, a reactor fuel pin can be considered as
+			 a zone. Users are allowed to define as many zones as they wish.
+
+			 
+	
+		-->
+		<species source=".\chain_endfb71.xml" amin="150" amax="250"></species>
+		<initial_concentrations source=".\w0.xml" override_species_names="true">
+			<!--
+				If the source XML file is prescribed, then the code will ignore the w0 list below.
+				If "override_species_names" attribute is set to "true", then, any species names in the
+				prescribed XML source that are not in the current species names list will be added.
+				NOTE: These attributes are OPTIONAL. If they are not present, the code will proceed
+				reading all initial nuclide concentrations listed below.
+			-->
+			<w0 species="U238">1.0</w0>
+		</initial_concentrations>
+		<reaction_rates>
+			<reaction species="U238" type="(n,gamma)">1e-4</reaction>
+			<reaction species="U238" type="fission">1e-5</reaction>
+		</reaction_rates>
+		<removals>
+			<removal rate="1.027082E-14" parent="Np237">Pa233</removal>
+			<removal rate="2.971055E-07" parent="Pa233">U233</removal>
+			<removal rate="1.380625E-13" parent="U233">Th229</removal>
+			<removal rate="2.994544E-12" parent="Th229">Ra225</removal>
+			<removal rate="5.384253E-07" parent="Ra225">Ac225</removal>
+			<removal rate="8.022537E-07" parent="Ac225">Fr221</removal>
+			<removal rate="2.406761E-03" parent="Fr221">At217</removal>
+			<removal rate="2.166085E+02" parent="At217">Bi213</removal>
+			<removal rate="0.00000519239" parent="Bi213">Tl209</removal>
+			<removal rate="0.00024324741" parent="Bi213">Po213</removal>
+			<removal rate="1.863299E+05" parent="Po213">Pb209</removal>
+			<removal rate="5.251115E-03" parent="Tl209">Pb209</removal>
+			<removal rate="5.924335E-05" parent="Pb209">Bi209</removal>
+		</removals>
+	</zone>
+	<!-- Simulation parameters. -->
+	<simulation_params>
+		<!-- 
+		
+			 SIMULATION PARAMETERS DESCRIPTION.
+			 
+			 n is the order of the calculation. This simply means that the substep size is below 10^-n sec.
+			 time_step is the time step of the calculation.
+			 precision_digits is the minimum number of accurate digits maintained in the arithmetics.
+			 output_digits is the number of decimal points to be displayed in the output.
+			 verbosity is the verbosity level. A higher verbosity means more console output messages will be displayed.
+			 output is the location of the output file on the disk.
+			 max_rate is the maximum removal rate to be considered in the calculation.*
+			 min_rate is the minimum removal rate to be considered in the calculation.**
+			 
+			 *Any removal rates that fall above max_rate will be ignored by the program.
+			 **Any removal rates that fall below min_rate will be ignored by the program.
+			 
+		-->
+		<n>12</n>
+		<time_step>1e+12</time_step>
+		<precision_digits>40</precision_digits>
+		<output_digits>15</output_digits>
+		<verbosity>1</verbosity>
+		<output>.\output.xml</output>
+		<max_rate>1e0</max_rate>
+		<min_rate>1e-200</min_rate>
+	</simulation_params>
+</problem>
+```
+
