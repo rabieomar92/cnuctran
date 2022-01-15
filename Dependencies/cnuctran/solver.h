@@ -102,7 +102,7 @@ namespace cnuctran
                     exit(1);
                 }
             }
-            else if (fission_yields.empty() && products.size() == 1)
+            else if ((fission_yields.empty() && products.size() == 1) || (fission_yields.size() == 1 && products.size() == 1))
             {
                 for (int product : products)
                 {
@@ -209,7 +209,7 @@ namespace cnuctran
             smatrix w = T.binpow(k).mul(converted_w0);
             auto t3 = chrono::high_resolution_clock::now();
             if (__vbs__) cout << "INFO\tDone computing concentrations.";
-            if (__vbs__) cout << chrono::duration_cast<chrono::milliseconds>(t3 - t1).count() << "ms. (" <<
+            if (__vbs__) cout << " (" <<
                 chrono::duration_cast<chrono::milliseconds>(t3 - t2).count() << "ms. for " << k << " mults.)" << endl;
 
             map<string, mpreal> out;
