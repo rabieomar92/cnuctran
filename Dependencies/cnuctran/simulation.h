@@ -52,7 +52,7 @@ namespace cnuctran {
             xml_parse_result open_success = file.load_file(xml_data_location.c_str());
             if (!open_success)
             {
-                cout << "WARNING <cnuctran::depletion_scheme::build_chains(...)> Fail retrieving data from " << (xml_data_location == ""? "NULL" : xml_data_location) << "." << endl;
+                cout << "INFO\t<cnuctran::depletion_scheme::build_chains(...)> Nuclides data file is not provided." << endl;
                 return;
             }
 
@@ -212,7 +212,7 @@ namespace cnuctran {
             xml_parse_result open_success = file.load_file(xml_data_location.c_str());
             if (!open_success)
             {
-                cout << "WARNING <cnuctran::depletion_scheme::get_nuclide_names(...)> Fail retrieving data from " << xml_data_location << "." << endl;
+                cout << "WARNING\t<cnuctran::depletion_scheme::get_nuclide_names(...)> Fail retrieving data from " << xml_data_location << "." << endl;
                 return vector<string>();
             }
 
@@ -255,7 +255,7 @@ namespace cnuctran {
                 xml_document input_file;
                 xml_parse_result open_success = input_file.load_file(xml_input.c_str());
                 if (!open_success) {
-                    cout << "FATAL-ERROR <cnuctran::simulation::from_input()> " << open_success.description() << endl;
+                    cout << "FATAL-ERROR\t<cnuctran::simulation::from_input()> " << open_success.description() << endl;
                     exit(1);
                 }
 
@@ -280,11 +280,12 @@ namespace cnuctran {
                 //Prints welcome message. Optional.
                 if (__vbs__)
                 {
-                    cout << "********************************************************\n";
-                    cout << "CNUCTRAN: A C++ Nuclear Transmutation Simulation Program" << endl;
-                    cout << "(c) M. R. Omar, Universiti Sains Malaysia (USM)." << endl;
-                    cout << "License: MIT." << endl;
-                    cout << "*********************************************************\n";
+                    cout << " __________________________________________________________\n";
+                    cout << "|                                                          |\n";
+                    cout << "| CNUCTRAN: C++ Nuclear Transmutation Simulation Program   |" << endl;
+                    cout << "| (c) M. R. Omar, Universiti Sains Malaysia, 2022.         |" << endl;
+                    cout << "| License: MIT.                                            |" << endl;
+                    cout << "|__________________________________________________________|\n\n";
                 }
 
                 //Obtains the precision digits from the input file.
@@ -293,7 +294,7 @@ namespace cnuctran {
                 if (precision_digits < 30)
                 {
                     precision_digits = 30;
-                    cout << "WARNING <cnuctran::simulation::from_input()> A precision < 30 digits is vulnerable to errorneous arithmetics that lead to fatal error." << endl;
+                    cout << "WARNING\t<cnuctran::simulation::from_input()> A precision < 30 digits is vulnerable to errorneous arithmetics that lead to fatal error." << endl;
                     cout << "The precision was set to 30 digits." << endl;
                 }
 
@@ -357,14 +358,14 @@ namespace cnuctran {
                                 AMin = stoi(zone.child("species").attribute("amin").value());
                             else
                             {
-                                cout << "warning <cnuctran::simulation::from_input()> AMin attribute is missing. Considering all nuclides with A > 0." << endl;
+                                cout << "WARNING\t<cnuctran::simulation::from_input()> AMin attribute is missing. Considering all nuclides with A > 0." << endl;
                                 AMin = 0;
                             }
                             if (strlen(zone.child("species").attribute("amax").value()) > 0)
                                 AMax = stoi(zone.child("species").attribute("amax").value());
                             else
                             {
-                                cout << "warning <cnuctran::simulation::from_input()> AMin attribute is missing. Considering all nuclides with A > 0." << endl;
+                                cout << "WARNING\t<cnuctran::simulation::from_input()> AMin attribute is missing. Considering all nuclides with A > 0." << endl;
                                 AMax = 400;
                             }
                             species_names = get_nuclide_names(zone.child("species").attribute("source").value(), AMin, AMax);
@@ -378,8 +379,8 @@ namespace cnuctran {
                         stringstream ss = stringstream(species); string token;
                         while (getline(ss, token, ' '))
                         {
-                            if (token != "")
-                                species_names.push_back(token);
+                            if (token != "" || token != NULL || strlen(token.c_str()) > 2)
+                                species_names.push_back(beautify(token));
                         }
                     }
 
@@ -428,9 +429,10 @@ namespace cnuctran {
                         if (!zone.child("initial_concentrations").child_value()) throw (int)errex::MISSING_W0;
                         for (xml_node item : zone.child("initial_concentrations").children())
                         {
-                            mpreal concentration = mpreal(item.child_value());
+                            if (string(item.name()) != "n0") continue;
+                            mpreal concentration = mpreal(item.attribute("value").value());
                             w0[item.attribute("species").value()] = concentration;
-                            if (__vbs__ == 2) cout << "input<initial_concentrations> species = " << item.attribute("species").value() << " w0 = " << concentration << endl;
+                            if (__vbs__ == 2) cout << "INPUT\t<initial_concentrations> species = " << item.attribute("species").value() << " w0 = " << concentration << endl;
                         }
                     }
 
@@ -445,7 +447,7 @@ namespace cnuctran {
                         mpreal rate = mpreal(removal.attribute("rate").value());
                         parent_species = removal.attribute("parent").value();
                         // Reads the product(s)/daughters of the removal.
-                        stringstream ss(removal.child_value()); string token;
+                        stringstream ss(removal.attribute("daughters").value()); string token;
                         while (getline(ss, token, ' '))
                             if (token != "") {
                                 vector<string>::iterator it_daughter = find(sol.species_names.begin(), sol.species_names.end(), token);
@@ -461,14 +463,14 @@ namespace cnuctran {
                                     }
                                     else
                                     {
-                                        cout << "WARNING <cnuctran::simulation::from_input()> Cannot add removal (" << parent_species << " rate = " << rate << endl;
+                                        cout << "WARNING\t<cnuctran::simulation::from_input()> Cannot add removal (" << parent_species << " rate = " << rate << endl;
                                     }
                                     
                                 }
                             }
                        
                         
-                        if (__vbs__ == 2) cout << "input<removal> parent = " << parent_species << " rate = " << rate << endl;
+                        if (__vbs__ == 2) cout << "INPUT\t<removal> parent = " << parent_species << " rate = " << rate << endl;
                     }
                    
                     
@@ -479,9 +481,10 @@ namespace cnuctran {
 
                     for (xml_node reaction : zone.child("reaction_rates").children())
                     {
-                        mpreal rate = mpreal(reaction.child_value());
+                        if (string(reaction.name()) != "reaction") continue;
+                        mpreal rate = mpreal(reaction.attribute("rate").value());
                         rxn_rates[reaction.attribute("species").value()][reaction.attribute("type").value()] = rate;
-                        if (__vbs__ == 2) cout << "input<rxn_rates> species = " << reaction.attribute("species").value() << " type = " << reaction.attribute("type").value() << " rate = " << rate << endl;
+                        if (__vbs__ == 2) cout << "INPUT\t<rxn_rates> species = " << reaction.attribute("species").value() << " type = " << reaction.attribute("type").value() << " rate = " << rate << endl;
                     }
 
 //..................Runs the simulation.
@@ -491,16 +494,16 @@ namespace cnuctran {
 
 //..................Prints to output file.
                     stringstream ss("");
-                    ss << "\t<nuclide_concentrations zone=\"" << zone.attribute("name").value() << "\" amin = \"" << AMin << "\" amax=\"" << AMax << "\" n=\"" << sol.species_names.size() << "\" time_step=\"" << t << "\">" << endl;
+                    ss << "\t<species_concentrations zone=\"" << zone.attribute("name").value() << "\" amin = \"" << AMin << "\" amax=\"" << AMax << "\" n=\"" << sol.species_names.size() << "\" time_step=\"" << t << "\">" << endl;
                     for (string species : sol.species_names)
                     {
                         mpreal c = w[species];
                         if (c > __eps__)
                         {
-                            ss << "\t\t<nuclide name=\"" << species << "\">" << scientific << setprecision(output_digits) << w[species] << "</nuclide>" << endl;
+                            ss << "\t\t<species name=\"" << species << "\">" << scientific << setprecision(output_digits) << w[species] << "</nuclide>" << endl;
                         }
                     }
-                    ss << "\t</nuclide_concentrations>" << endl;
+                    ss << "\t</species_concentrations>" << endl;
                     file << ss.str();
 
                 }
@@ -516,29 +519,29 @@ namespace cnuctran {
                 switch (e)
                 {
                 case errex::MISSING_SUBSTEP_SIZE:
-                    cout << "FATAL-ERROR <cnuctran::simulation::from_input()> Precision order, n, is not supplied." << endl;
+                    cout << "FATAL-ERROR\t<cnuctran::simulation::from_input()> Precision order, n, is not supplied." << endl;
                     exit(1);
                 case errex::MISSING_STEP_SIZE:
-                    cout << "FATAL-ERROR <cnuctran::simulation::from_input()> Time step, t, is not supplied." << endl;
+                    cout << "FATAL-ERROR\t<cnuctran::simulation::from_input()> Time step, t, is not supplied." << endl;
                     exit(1);
                 case errex::MISSING_SPECIES_NAMES:
-                    cout << "FATAL-ERROR <cnuctran::simulation::from_input()> Species names are not supplied." << endl;
+                    cout << "FATAL-ERROR\t<cnuctran::simulation::from_input()> Species names are not supplied." << endl;
                     exit(1);
                 case errex::MISSING_W0:
-                    cout << "FATAL-ERROR <cnuctran::simulation::from_input()> Initial nuclide concentrations are not supplied." << endl;
+                    cout << "FATAL-ERROR\t<cnuctran::simulation::from_input()> Initial nuclide concentrations are not supplied." << endl;
                     exit(1);
                 case errex::NUCLIDES_DATA_LOAD_FAILED:
-                    cout << "FATAL-ERROR <cnuctran::simulation::from_input()> Could open source file." << endl;
+                    cout << "FATAL-ERROR\t<cnuctran::simulation::from_input()> Could open source file." << endl;
                     exit(1);
                 case errex::XML_READING_ERROR:
-                    cout << "FATAL-ERROR <cnuctran::simulation::from_input()> An error has occurred while reading the XML input file: " << xml_input << endl;
+                    cout << "FATAL-ERROR\t<cnuctran::simulation::from_input()> An error has occurred while reading the XML input file: " << xml_input << endl;
                     exit(1);
                 case errex::MISSING_W0_SOURCE:
-                    cout << "FATAL-ERROR <cnuctran::simulation::from_input()> Could not open the initial nuclide concentrations XML file." << endl;
+                    cout << "FATAL-ERROR\t<cnuctran::simulation::from_input()> Could not open the initial nuclide concentrations XML file." << endl;
                     exit(1);
 
                 default:
-                    cout << "FATAL-ERROR <cnuctran::simulation::from_input()> Unexpected error has occurred." << endl;
+                    cout << "FATAL-ERROR\t<cnuctran::simulation::from_input()> Unexpected error has occurred." << endl;
                     exit(1);
                 }
             }
