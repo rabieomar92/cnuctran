@@ -97,7 +97,7 @@ namespace cnuctran
                 }
                 else
                 {
-                    cout << "FATAL-ERROR <cnuctran::solver::add_removal(...)> Insufficient fission yields given for species " <<
+                    cout << "FATAL-ERROR\t<cnuctran::solver::add_removal(...)> Insufficient fission yields given for species " <<
                         this->species_names[species_index] << " products.";
                     exit(1);
                 }
@@ -112,10 +112,10 @@ namespace cnuctran
             }
             else
             {
-                cout << "FATAL-ERROR <cnuctran::solver::add_removal(...)> Invalid removal definition for isotope " <<
+                cout << "FATAL-ERROR\t<cnuctran::solver::add_removal(...)> Invalid removal definition for isotope " <<
                     this->species_names[species_index] << endl;
-                cout << "Non-fission events MUST only have ONE daughter product." << endl;
-                cout << "Whereas fission events MUST have >1 products to track." << endl;
+                cout << "INFO\tNon-fission events MUST only have ONE daughter product." << endl;
+                cout << "INFO\tWhereas fission events MUST have >1 products to track." << endl;
                 exit(1);
 
             }
@@ -201,14 +201,14 @@ namespace cnuctran
             mpz_t substeps; mpz_set_str(substeps, suggested_substeps.toString().c_str(), 10);
 
 //..........Compute the transfer matrix power.
-            if (__vbs__) cout << "time-step = " << t << " sec(s)."  << endl;
-            if (__vbs__) cout << "max-rate = " << __mxr__ << " per sec.\tmin-rate = " << __mnr__ << " per sec." << endl;
+            if (__vbs__) cout << "INFO\ttime-step = " << t << " sec(s)."  << endl;
+            if (__vbs__) cout << "INFO\tmax-rate = " << __mxr__ << " per sec.\tmin-rate = " << __mnr__ << " per sec." << endl;
             auto t1 = chrono::high_resolution_clock::now();
             smatrix T = this->prepare_transfer_matrix(t / suggested_substeps);
             auto t2 = chrono::high_resolution_clock::now();
             smatrix w = T.binpow(k).mul(converted_w0);
             auto t3 = chrono::high_resolution_clock::now();
-            if (__vbs__) cout << "Done computing concentrations.";
+            if (__vbs__) cout << "INFO\tDone computing concentrations.";
             if (__vbs__) cout << chrono::duration_cast<chrono::milliseconds>(t3 - t1).count() << "ms. (" <<
                 chrono::duration_cast<chrono::milliseconds>(t3 - t2).count() << "ms. for " << k << " mults.)" << endl;
 
