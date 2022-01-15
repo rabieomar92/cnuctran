@@ -19,6 +19,7 @@
 #include <mpir.h>
 #include <mpreal.h>
 #include <unordered_map>
+#include <cstring>
 
 using namespace std;
 using namespace mpfr;
@@ -88,6 +89,18 @@ namespace cnuctran
         MISSING_W0_SOURCE = 9
 
     };
+
+    /*
+        Trims species name string. Removes non-alphanumeric characters from the specified string.
+    */
+    static string beautify(string& s)
+    {
+        string rv = "";
+        for (auto& c : s)
+            if (isalnum(c))
+                rv += c;
+        return rv;
+    }
 }
 
 
