@@ -402,7 +402,7 @@ namespace cnuctran {
                                 if (__vbs__) cout << "Reading the initial nuclide concentrations from " << w0_source << " for zone '" << concs.attribute("zone").value() << "'." << endl;
                                 for (xml_node nuclide : concs)
                                 {
-                                    string name = nuclide.attribute("name").value();
+                                    string name = nuclide.attribute("species").value();
                                     mpreal concentration = mpreal(nuclide.child_value());
                                     if (override_species_names == "true")
                                     {
@@ -444,30 +444,40 @@ namespace cnuctran {
                     for (xml_node removal : zone.child("removals").children())
                     {
                         vector<int> daughters;
+                        vector<mpreal> yields;
                         mpreal rate = mpreal(removal.attribute("rate").value());
                         parent_species = removal.attribute("parent").value();
                         // Reads the product(s)/daughters of the removal.
                         stringstream ss(removal.attribute("daughters").value()); string token;
+                        stringstream sy(removal.attribute("yields").value()); string ytoken;
+
                         while (getline(ss, token, ' '))
-                            if (token != "") {
+                        {
+                            getline(sy, ytoken, ' ');
+                            if (token != "") 
+                            {
                                 vector<string>::iterator it_daughter = find(sol.species_names.begin(), sol.species_names.end(), token);
                                 if (it_daughter != species_names.end())
                                 {
                                     int daughter_id = distance(sol.species_names.begin(), it_daughter);
                                     daughters.push_back(daughter_id);
+                                    if (beautify(ytoken) != NULL || beautify(ytoken) != "")
+                                        yields.push_back(mpreal(beautify(ytoken)));
                                     vector<string>::iterator it_parent = find(sol.species_names.begin(), sol.species_names.end(), parent_species);
                                     if (it_parent != species_names.end())
                                     {
-                                        int parent_id = distance(sol.species_names.begin(), it_parent);
-                                        sol.add_removal(parent_id, rate, daughters);
+                                       int parent_id = distance(sol.species_names.begin(), it_parent);
+                                        sol.add_removal(parent_id, rate, daughters, yields);
                                     }
                                     else
                                     {
-                                        cout << "WARNING\t<cnuctran::simulation::from_input()> Cannot add removal (" << parent_species << " rate = " << rate << endl;
+                                        cout << "WARNING\t<cnuctran::simulation::from_input()> The parent species \"" << parent_species << "\" for the specified removal is not defined in the current calculation.\n";
                                     }
                                     
                                 }
                             }
+                        }
+                           
                        
                         
                         if (__vbs__ == 2) cout << "INPUT\t<removal> parent = " << parent_species << " rate = " << rate << endl;
@@ -494,13 +504,14 @@ namespace cnuctran {
 
 //..................Prints to output file.
                     stringstream ss("");
+                    ss << "\t<!-- NOTE: All species concentrations less than the epsilon (" << __eps__ << ") \n\t     are not included in this file. -->\n";
                     ss << "\t<species_concentrations zone=\"" << zone.attribute("name").value() << "\" amin = \"" << AMin << "\" amax=\"" << AMax << "\" n=\"" << sol.species_names.size() << "\" time_step=\"" << t << "\">" << endl;
                     for (string species : sol.species_names)
                     {
                         mpreal c = w[species];
                         if (c > __eps__)
                         {
-                            ss << "\t\t<species name=\"" << species << "\">" << scientific << setprecision(output_digits) << w[species] << "</nuclide>" << endl;
+                            ss << "\t\t<concentration species=\"" << species << "\">" << scientific << setprecision(output_digits) << w[species] << "</concentration>" << endl;
                         }
                     }
                     ss << "\t</species_concentrations>" << endl;
