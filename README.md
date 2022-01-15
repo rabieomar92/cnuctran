@@ -29,7 +29,7 @@ If you don't prefer dealing with complicated mathematical methods to solve Batem
 ## Program Flow
 The program package consists of four (4) important files in order to run smoothly. They are the input file (input.XML) which consists of the problem definition set by the user; cnuctran.exe which is the executable of the compiled CNUCTRAN C++ codes; and finally, mpfr.dll and mpir.dll which are the dependencies of CNUCTRAN to enable high-precision arithmetics. Firstly, cnuctran.exe will read the simulation parameters defined in input.XML, including the arithmetic precision level. Here, the precision is defined in terms of the number of significant digits, n_sig, which can be set via the ```<precision_digits>n_sig</precision_digits>``` tag, inside the  ```<simulation_params></simulation_params>``` node. 
 
-In the second step, the program will iterate over all zones defined by the user via the ```<zone></zone>``` tag. For each zone, the program will reads the species names involved in the calculation as well as the reaction rates and the initial species concentrations. Once all parameters have been acquired, the transfer matrix is constructed for the zone. Finally, the program will run the calculation, and these processes repeat for all zones. The calculated species concentrations will be printed in the output file specified by the user via the ```<output>output_location</output>``` tag inside the  ```<simulation_params></simulation_params>``` of the input file. 
+In the second step, the program will iterate over all zones defined by the user via the ```<zone></zone>``` tag. For each zone, the program reads the species names involved in the calculation as well as the reaction rates and the initial species concentrations. Once all parameters have been acquired, the transfer matrix is constructed for the zone. Finally, the program will run the calculation, and these processes repeat for all zones. The calculated species concentrations will be printed in the output file specified by the user via the ```<output>output_location</output>``` tag inside the  ```<simulation_params></simulation_params>``` of the input file. 
 
 ## Summary of the Method
 
@@ -160,7 +160,7 @@ where c<sub><i>i</i></sub> is the normalization constant and δ<sub><i>jl</i></s
 				Each zone must have a list of species names to enable the calculation.
 
 				DATA SOURCE.
-				The user could provide the nuclides data via the following attribute:
+				The user can provide the nuclides data via the following attribute:
 				<species source=".\nuclides\data\source\location"></species>
 
 				SPECIES NAME SPECIFICATION.
@@ -178,13 +178,27 @@ where c<sub><i>i</i></sub> is the normalization constant and δ<sub><i>jl</i></s
 			Np237 Pa233 U233 Th229 Ra225 Ac225 Fr221 At217 Bi213 Po213 Tl209 Pb209 Bi209
 		</species>
 		
-		<initial_concentrations source=".\w0.xml">
-			<n0 species="Np237" value="1.0" />
+		<initial_concentrations>
+			<!--
+				INITIAL CONCENTRATIONS SPECIFICATION.
+				
+				The user may define the initial concentration of each individual nuclide manually via
+				the <n0 species="species_name" value="#####" /> tag.
+ 				The user can also import the previously calculated concentrations stored in an XML file.
+				Note that the output XML of the previous calculations can serve as the initial concentration
+				source file. To import the existing concentration file, the following attribute must exist,
+
+				<initial_concentrations source=".\path\to\initial\concentration\file.xml"></initial_concentrations>
+			-->
+			
+			<concentration species="Np237" value="1.0" />
 		</initial_concentrations>
+		
 		<reaction_rates>
 			<reaction species="U238" type="(n,gamma)" rate="1e-4" />
 			<reaction species="U238" type="fission" rate="1e-5" />
 		</reaction_rates>
+		
 		<removals>
 			<removal rate="1.027082E-14" parent="Np237" daughters="Pa233" yields="1.0" />
 			<removal rate="2.971055E-07" parent="Pa233" daughters="U233" yields="1.0" />
