@@ -395,15 +395,17 @@ namespace cnuctran {
                         if (override_species_names == "true") species_names.clear();
                         if (load_success)
                         {
-                            for (xml_node concs : w0_doc.children())
+                            for (xml_node concs : w0_doc.child("output").children())
                             {
-                                if (string(concs.name()) != "nuclide_concentrations") continue;
+                         
+                                if (string(concs.name()) != "species_concentrations") continue;
                                 if (string(concs.attribute("zone").value()) != string(zone.attribute("name").value())) continue;
                                 if (__vbs__) cout << "Reading the initial nuclide concentrations from " << w0_source << " for zone '" << concs.attribute("zone").value() << "'." << endl;
                                 for (xml_node nuclide : concs)
                                 {
+                                    if (string(nuclide.name()) != "concentration") continue;
                                     string name = nuclide.attribute("species").value();
-                                    mpreal concentration = mpreal(nuclide.child_value());
+                                    mpreal concentration = mpreal(nuclide.attribute("value").value());
                                     if (override_species_names == "true")
                                     {
                                         species_names.push_back(name);
@@ -429,7 +431,7 @@ namespace cnuctran {
                         if (!zone.child("initial_concentrations").child_value()) throw (int)errex::MISSING_W0;
                         for (xml_node item : zone.child("initial_concentrations").children())
                         {
-                            if (string(item.name()) != "n0") continue;
+                            if (string(item.name()) != "concentration") continue;
                             mpreal concentration = mpreal(item.attribute("value").value());
                             w0[item.attribute("species").value()] = concentration;
                             if (__vbs__ == 2) cout << "INPUT\t<initial_concentrations> species = " << item.attribute("species").value() << " w0 = " << concentration << endl;
@@ -511,7 +513,7 @@ namespace cnuctran {
                         mpreal c = w[species];
                         if (c > __eps__)
                         {
-                            ss << "\t\t<concentration species=\"" << species << "\">" << scientific << setprecision(output_digits) << w[species] << "</concentration>" << endl;
+                            ss << "\t\t<concentration species=\"" << species << "\" value=\"" << scientific << setprecision(output_digits) << w[species] << "\"/>" << endl;
                         }
                     }
                     ss << "\t</species_concentrations>" << endl;
