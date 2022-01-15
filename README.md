@@ -140,50 +140,69 @@ where c<sub><i>i</i></sub> is the normalization constant and δ<sub><i>jl</i></s
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
+
 <problem>
-	<!-- Calculation zones. -->
+
+  <!-- Calculation zones. -->
 	<zone name="myzone">
 		<!--
 			 ZONE DEFINITIONS.
 			 
 			 Each zone has its own problem definition. For instance, a reactor fuel pin can be considered as
 			 a zone. Users are allowed to define as many zones as they wish.
-
-			 
 	
 		-->
-		<species source=".\chain_endfb71.xml" amin="150" amax="250"></species>
-		<initial_concentrations source=".\w0.xml" override_species_names="true">
+		
+		<species>
 			<!--
-				If the source XML file is prescribed, then the code will ignore the w0 list below.
-				If "override_species_names" attribute is set to "true", then, any species names in the
-				prescribed XML source that are not in the current species names list will be added.
-				NOTE: These attributes are OPTIONAL. If they are not present, the code will proceed
-				reading all initial nuclide concentrations listed below.
+				SPECIES DEFINITIONS.
+			
+				Each zone must have a list of species names to enable the calculation.
+
+				DATA SOURCE.
+				The user could provide the nuclides data via the following attribute:
+				<species source=".\nuclides\data\source\location"></species>
+
+				SPECIES NAME SPECIFICATION.
+				The user may specify the names manually, OR, specify the range of species names:
+				
+				For example, if the user wishes to include all nuclides with atomic number within
+				[100,300], then add the following attribute,
+				
+    				<species source="nuclides\data\source\" amin="100" amax="300">...</species>
+
+				However, the nuclides data source file must be specified. Specifying amin and amax 
+				attributes will ignore the species names listed in the species node. 
 			-->
-			<w0 species="U238">1.0</w0>
+				
+			Np237 Pa233 U233 Th229 Ra225 Ac225 Fr221 At217 Bi213 Po213 Tl209 Pb209 Bi209
+		</species>
+		
+		<initial_concentrations source=".\w0.xml">
+			<n0 species="Np237" value="1.0" />
 		</initial_concentrations>
 		<reaction_rates>
-			<reaction species="U238" type="(n,gamma)">1e-4</reaction>
-			<reaction species="U238" type="fission">1e-5</reaction>
+			<reaction species="U238" type="(n,gamma)" rate="1e-4" />
+			<reaction species="U238" type="fission" rate="1e-5" />
 		</reaction_rates>
 		<removals>
-			<removal rate="1.027082E-14" parent="Np237">Pa233</removal>
-			<removal rate="2.971055E-07" parent="Pa233">U233</removal>
-			<removal rate="1.380625E-13" parent="U233">Th229</removal>
-			<removal rate="2.994544E-12" parent="Th229">Ra225</removal>
-			<removal rate="5.384253E-07" parent="Ra225">Ac225</removal>
-			<removal rate="8.022537E-07" parent="Ac225">Fr221</removal>
-			<removal rate="2.406761E-03" parent="Fr221">At217</removal>
-			<removal rate="2.166085E+02" parent="At217">Bi213</removal>
-			<removal rate="0.00000519239" parent="Bi213">Tl209</removal>
-			<removal rate="0.00024324741" parent="Bi213">Po213</removal>
-			<removal rate="1.863299E+05" parent="Po213">Pb209</removal>
-			<removal rate="5.251115E-03" parent="Tl209">Pb209</removal>
-			<removal rate="5.924335E-05" parent="Pb209">Bi209</removal>
+			<removal rate="1.027082E-14" parent="Np237" daughters="Pa233" yields="1.0" />
+			<removal rate="2.971055E-07" parent="Pa233" daughters="U233" yields="1.0" />
+			<removal rate="1.380625E-13" parent="U233" daughters="Th229" yields="1.0" />
+			<removal rate="2.994544E-12" parent="Th229" daughters="Ra225" yields="1.0" />
+			<removal rate="5.384253E-07" parent="Ra225" daughters="Ac225" yields="1.0" />
+			<removal rate="8.022537E-07" parent="Ac225" daughters="Fr221" yields="1.0" />
+			<removal rate="2.406761E-03" parent="Fr221" daughters="At217" yields="1.0" />
+			<removal rate="2.166085E+02" parent="At217" daughters="Bi213" yields="1.0" />
+			<removal rate="0.00000519239" parent="Bi213" daughters="Tl209" yields="1.0" />
+			<removal rate="0.00024324741" parent="Bi213" daughters="Po213" yields="1.0" />
+			<removal rate="1.863299E+05" parent="Po213" daughters="Pb209" yields="1.0" />
+			<removal rate="5.251115E-03" parent="Tl209" daughters="Pb209" yields="1.0" />
+			<removal rate="5.924335E-05" parent="Pb209" daughters="Bi209" yields="1.0" />
 		</removals>
 	</zone>
-	<!-- Simulation parameters. -->
+
+  <!-- Simulation parameters. -->
 	<simulation_params>
 		<!-- 
 		
@@ -203,12 +222,12 @@ where c<sub><i>i</i></sub> is the normalization constant and δ<sub><i>jl</i></s
 			 
 		-->
 		<n>12</n>
-		<time_step>1e+12</time_step>
+		<time_step>31556952000000</time_step>
 		<precision_digits>40</precision_digits>
 		<output_digits>15</output_digits>
-		<verbosity>1</verbosity>
+		<verbosity>2</verbosity>
 		<output>.\output.xml</output>
-		<max_rate>1e0</max_rate>
+		<max_rate>1000000000</max_rate>
 		<min_rate>1e-200</min_rate>
 	</simulation_params>
 </problem>
