@@ -34,12 +34,12 @@ In the second step, the program will iterate over all zones defined by the user 
 ## Summary of the Method
 
 <div align="justify">
-A transmutation process involves the removal of a nuclide from a system. Then it leads to the creation of another daughter nuclide. For instance, the decay of U-238 into Th-234 involves removing U-238 from the system via alpha decay, which in fact mutating the U-238 nucleus into Th-234. In reality, such a transmutation process occur at a certain rate, Λ. CNUCTRAN works by first accumulating the removal parameters from the user. The removal parameters include the rate, parent isotope and the daughter isotope(s). Practically, any number of removals can be added to CNUCTRAN. Next, CNUCTRAN prepares the transfer matrix, <b>A</b>, that stores the probabilities of various transmutations from one species to another.
+A transmutation process involves the removal of a nuclide from a system. Then it leads to the creation of another daughter nuclide. For instance, the decay of U-238 into Th-234 involves removing U-238 from the system via alpha decay, which in fact mutating the U-238 nucleus into Th-234. In reality, such a transmutation process occur at a certain rate, Λ. CNUCTRAN works by first accumulating the removal parameters from the user. The removal parameters include the rate, parent isotope and the daughter isotope(s). Practically, any number of removals can be added to CNUCTRAN. Next, CNUCTRAN prepares the transfer matrix, <b>A</b>, a scaling factor that scales the initial isotope concentrations into the final concentrations. The construction of <b>A</b> requires the probabilities of various transmutations from one species to another.
 </br></br>
 </div>
 
 <div align="justify">
-  The simulation requires the division of timestep, <i>t</i> into <i>N</i> regular substeps, and the substep interval is Δ<i>t</i>. Consider an isotope-<i>i</i> which is expecting to experience <i>J<sub>i</sub></i> removal events. For example, U-235 may experience absorption, fission and decay events, so, there are <i>J<sub>i</sub></i>=3 removal events. Let Λ<sub><i>ij</i></sub> be the rate (per secs.) of removal event-<i>j</i> experienced by isotope <i>i</i>. For decay removal events, Λ<sub><i>ij</i></sub> is the decay constant multiplied with the branching ratio of the decay branch, i.e. Λ<sub><i>ij</i></sub> = b<sub><i>ij</i></sub></sub>λ<sub><i>ij</i></sub>.  The removal probability (or probability of a removal event to occur) of isotope-<i>i</i> from a system due to <i>j</i>-th removal process can be derived from Poisson statistics, leading to an un-normalized joint Poisson distribution (later known as π-distribution),
+  The simulation requires the division of timestep, <i>t</i> into <i>N</i> regular substeps, and the substep interval is given by Δ<i>t</i>. Consider an isotope-<i>i</i> which is expecting to experience <i>J<sub>i</sub></i> removal events. For example, U-235 may experience absorption, fission and decay events, so, there are <i>J<sub>i</sub></i>=3 removal events. Let Λ<sub><i>ij</i></sub> be the rate (per secs.) of removal event-<i>j</i> experienced by isotope <i>i</i>. For decay removal events, Λ<sub><i>ij</i></sub> is the decay constant multiplied with the branching ratio of the decay branch, i.e. Λ<sub><i>ij</i></sub> = b<sub><i>ij</i></sub></sub>λ<sub><i>ij</i></sub>.  The removal probability (or probability of a removal event to occur) of isotope-<i>i</i> from a system due to <i>j</i>-th removal process can be derived from Poisson statistics, leading to an un-normalized joint Poisson distribution (later known as π-distribution),
 </div>
 
 \
@@ -61,7 +61,7 @@ Conveniently, the derived joint Poisson distribution is coined as the π-distrib
 
 <img src="https://latex.codecogs.com/svg.latex?\mathbf{A}&space;=&space;\begin{pmatrix}&space;\pi_{1\rightarrow&space;1}&space;&&space;\cdots&space;&&space;\pi_{I\rightarrow&space;1}&space;\\&space;\vdots&space;&&space;\ddots&space;&&space;\vdots&space;\\&space;\pi_{1\rightarrow&space;I}&space;&&space;\cdots&space;&&space;\pi_{I\rightarrow&space;I}&space;\end{pmatrix}" title="\mathbf{A} = \begin{pmatrix} \pi_{1\rightarrow 1} & \cdots & \pi_{I\rightarrow 1} \\ \vdots & \ddots & \vdots \\ \pi_{1\rightarrow I} & \cdots & \pi_{I\rightarrow I} \end{pmatrix}" />
 
-where π(k→i) is the transfer probability which is defined as
+where π(k→i) is a scaling factor that scales the initial concentration of isotope-*i*. Also, π(k→i) is defined as
 
 <img src="https://latex.codecogs.com/svg.latex?\pi_{k&space;\rightarrow&space;i}&space;=&space;\sum_{j\in&space;R}^{}&space;\pi_{kj};\;&space;\;&space;\;\pi_{i&space;\rightarrow&space;i}&space;=&space;\pi_{i0}" title="\pi_{k \rightarrow i} = \sum_{j\in R}^{} \pi_{kj}" />
 
