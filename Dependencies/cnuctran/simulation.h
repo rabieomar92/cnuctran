@@ -29,6 +29,7 @@
 #include <smatrix.h>
 #include <solver.h>
 #include <cnuctran.h>
+#include <ctime>
 
 using namespace pugi;
 using namespace mpfr;
@@ -65,7 +66,6 @@ namespace cnuctran {
                 vector<string>::iterator it = std::find(species_names.begin(), species_names.end(), species_name);
                 if (it == species_names.end())
                     continue;
-
 
                 mpreal decay_rate;
                 if (species.attribute("half_life"))
@@ -298,6 +298,11 @@ namespace cnuctran {
                     cout << "The precision was set to 30 digits." << endl;
                 }
 
+                //Obtains epsilon from the user.
+                tmp = root.child("simulation_params").child("epsilon").child_value();
+                if (tmp != "") __eps__ = mpreal(tmp, digits2bits(__dps__));
+                if (__eps__ < mpreal("0.0", digits2bits(__dps__))) cout << "WARNING\t<cnuctran::simulation::from_input()> Epsilon must be greater than zero.\n";
+
                 //Obtains the minimum rate from the input file.
                 tmp = root.child("simulation_params").child("min_rate").child_value();
                 if (tmp != "") __mnr__ = mpreal(tmp).toDouble();
@@ -337,11 +342,28 @@ namespace cnuctran {
                 file.open(output_location, ios::out);
                 file << "<output>" << endl;
 
+                // Initialize file stream of the user-friendly output file (output.out).
+                ofstream uffile;
+                uffile.open("./output.out", ios::out);
+                uffile << "Final nuclides concentration computed using CNUCTRAN" << endl;
+                auto current_t = std::time(nullptr);
+                auto tm = *std::localtime(&current_t);
+                uffile << "Date: " << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << endl << endl;
+
                 //Loop over all relevant XML child nodes for each zone.
                 for (xml_node zone : root.children())
                 {
+
                     // Filters XML nodes that are not a zone node.
                     if (string(zone.name()) != "zone") continue;
+
+                    // Printing concentrations table header for each calculation zone.
+                    // This table will be printed into ./output.out.
+                    uffile << "Zone: " << string(zone.name()) << endl;
+                    uffile << "+--------------+---------------------------------------------------+" << endl;
+                    uffile << "| Nuclide Name | Final Concentration                               |" << endl;
+                    uffile << "+--------------+---------------------------------------------------+" << endl;
+
                     if (__vbs__) cout << "Processing zone '" << zone.attribute("name").value() << "'" << endl;
 
                     // Reads the species names.
@@ -514,16 +536,18 @@ namespace cnuctran {
                         if (c > __eps__)
                         {
                             ss << "\t\t<concentration species=\"" << species << "\" value=\"" << scientific << setprecision(output_digits) << w[species] << "\"/>" << endl;
+                            uffile << "| " << setw(13) << left << species << "| " << scientific << setw(50) << left << setprecision(output_digits) << w[species] << "|" << endl;
                         }
                     }
                     ss << "\t</species_concentrations>" << endl;
                     file << ss.str();
-
+                    uffile << "+------------------------------------------------------------------+" << endl << endl;
                 }
 
                 //Closes the output file stream.
                 file << "</output>" << endl;
                 file.close();
+                uffile.close();
 
 
             }
