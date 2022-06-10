@@ -47,7 +47,7 @@ namespace cnuctran
 
     */
 
-    const mpreal __eps__ = mpreal("1e-200", digits2bits(50));
+    mpreal __eps__ = mpreal("1e-200", digits2bits(50));
     double __mnr__ = 1e-200;
     double __mxr__ = 1e+200;
     const int    __dps__ = 200;
@@ -97,7 +97,7 @@ namespace cnuctran
     {
         string rv = "";
         for (auto& c : s)
-            if (isalnum(c))
+            if (isalnum(c) || c == '_')
                 rv += c;
         return rv;
     }
