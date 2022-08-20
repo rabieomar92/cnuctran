@@ -1,14 +1,15 @@
 /*
-* 
+*
       This file is part of the CNUCTRAN library
- 
+
       @license  MIT
-      @author   M. R. Omar
       @link     https://github.com/rabieomar92/cnuctran
 
-      This header file contains the definitions of SMATRIX, which is a component
-      of CNUCTRAN. SMATRIX enables fast and accurate sparse binary exponentiation
-      using the arbitrary precision floating-point library, MPFR.
+      Copyright (c) 2022 M. R. Omar
+
+      This header file contains  the  definitions of SMATRIX class.  SMATRIX enables fast, 
+      parallelized and accurate sparse binary exponentiation using the arbitrary precision 
+      floating-point library, MPFR.
 
  */
 
@@ -16,31 +17,35 @@
 #define SMATRIX_H
 
 #include <iostream>
-#include <mpfr.h>
-#include <mpir.h>
 #include <mpreal.h>
 #include <unordered_map>
-#include <cnuctran.h>
+#include <cnuctran/cnuctran.h>
+#include <ppl.h>
 
-using namespace std;
 using namespace mpfr;
+using namespace concurrency;
+
+std::mutex mtx;
 
 namespace cnuctran
 {
- 
+
     class smatrix {
 
     public:
 
-        pair<int, int> shape;
+        std::pair<int, int> shape;
         map_2d nzel;
 
         /*
             Constructor definitions.
         */
         smatrix(void) { return; }
-        smatrix(pair<int, int> shape) { this->shape = shape; return; }
-        smatrix(pair<int, int> shape, map_2d& A) { this->shape = shape; this->nzel = A; return; }
+        smatrix(std::pair<int, int> shape) { this->shape = shape; return; }
+        smatrix(std::pair<int, int> shape, map_2d& A) 
+        { 
+            this->shape = shape; this->nzel = A; return; 
+        }
 
         smatrix copy()
         {
@@ -53,40 +58,51 @@ namespace cnuctran
         {
             int const& sx = this->shape.first;
             int const& sy = other.shape.second;
-            smatrix result = smatrix(pair<int, int>(sx, sy));
-
+            smatrix result = smatrix(std::pair<int, int>(sx, sy));
+            auto& r = result.nzel;
 
             int row;
-            for (row = 0; row < sx; row++)
-            {
-                auto& c = result.nzel[row];
-                for (const auto& [k1, v1] : this->nzel[row])
-                    for (const auto& [k2, v2] : other.nzel[k1])
-                        c[k2] += v1 * v2;
-            }
+            parallel_for_each(begin(nzel), end(nzel), [&](std::pair<int, map_1d> p)
+                {
+                    map_1d c;
+                    auto& r = result.nzel;
+                    for (const auto& [k1, v1] : this->nzel[row])
+                        for (const auto& [k2, v2] : other.nzel[k1])
+                            c[k2] += v1 * v2;
+                    mtx.lock();
+                    r[p.first] = c;
+                    mtx.unlock();
+                });
             return result;
         }
-
+        
+        
         smatrix smul(void)
         {
             smatrix result(shape);
-            int row;
-            for (row = 0; row < shape.first; row++)
-            {
-                auto& c = result.nzel[row];
-                for (const auto& [k1, v1] : nzel[row])
-                    for (const auto& [k2, v2] : nzel[k1])
-                        c[k2] += v1 * v2;
-
-            }
+            auto& r = result.nzel;
+            parallel_for_each(begin(nzel), end(nzel), [&](std::pair<int, map_1d> p)
+                {
+                    map_1d c;
+                    for (const auto& [k1, v1] : p.second)
+                        for (const auto& [k2, v2] : nzel[k1])
+                            c[k2] += v1 * v2;
+                    mtx.lock();
+                    r[p.first] = c;
+                    mtx.unlock();
+                });  
+          
             return result;
+
         }
 
         smatrix binpow(int k)
         {
             auto r = copy();
             for (int i = 1; i <= k; i++)
+            {
                 r = r.smul();
+            }
             return r;
         }
     };
