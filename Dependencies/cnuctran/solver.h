@@ -37,10 +37,6 @@ namespace cnuctran
             matrix operations, it only cover the basic operations used by CNUCTRAN, i.e.
             Multiplication and Powers.
 
-            Of course, there is still no known library that provides high-precision sparse
-            matrix operations. Therefore, I must endure writing a new specialized class
-            handling sparse matrix power to preserve the accuracy.
-
     */
 
     class solver
