@@ -59,20 +59,16 @@ namespace cnuctran
             int const& sx = this->shape.first;
             int const& sy = other.shape.second;
             smatrix result = smatrix(std::pair<int, int>(sx, sy));
-            auto& r = result.nzel;
+
 
             int row;
-            parallel_for_each(begin(nzel), end(nzel), [&](std::pair<int, map_1d> p)
-                {
-                    map_1d c;
-                    auto& r = result.nzel;
-                    for (const auto& [k1, v1] : this->nzel[row])
-                        for (const auto& [k2, v2] : other.nzel[k1])
-                            c[k2] += v1 * v2;
-                    mtx.lock();
-                    r[p.first] = c;
-                    mtx.unlock();
-                });
+            for (row = 0; row < sx; row++)
+            {
+                auto& c = result.nzel[row];
+                for (const auto& [k1, v1] : this->nzel[row])
+                    for (const auto& [k2, v2] : other.nzel[k1])
+                        c[k2] += v1 * v2;
+            }
             return result;
         }
         
