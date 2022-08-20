@@ -3,8 +3,9 @@
       This file is part of the CNUCTRAN library
 
       @license  MIT
-      @author   M. R. Omar
       @link     https://github.com/rabieomar92/cnuctran
+
+      Copyright (c) 2022 M. R. Omar
 
       This header file contains the definitions of all reusable constants and
       and variables in CNUCTRAN.
@@ -14,14 +15,9 @@
 #ifndef CNUCTRAN_H
 #define CNUCTRAN_H
 
-#include <iostream>
-#include <mpfr.h>
-#include <mpir.h>
 #include <mpreal.h>
-#include <unordered_map>
-#include <cstring>
+#include <string>
 
-using namespace std;
 using namespace mpfr;
 
 namespace cnuctran
@@ -58,7 +54,7 @@ namespace cnuctran
 
 
     /*
-        A modified hash function for the unordered_map.
+        A modified hash function for the std::unordered_map.
         We don't care about hackers, here we want to minimize hashing burden to improve element access.
         Therefore, the simplest hash function is used - the hash of an integer is the integer itself.
     */
@@ -71,8 +67,8 @@ namespace cnuctran
         Type definition for sparse matrix non-zero elements container.
         The container is a nested unordered map. 
     */
-    typedef unordered_map<int, unordered_map<int, mpreal, modified_hash>, modified_hash> map_2d;
-
+    typedef std::unordered_map<int, std::unordered_map<int, mpreal, modified_hash>, modified_hash> map_2d;
+    typedef std::unordered_map<int, mpreal, modified_hash> map_1d;
     /*
         Enums for exceptions handling.
     */
@@ -90,12 +86,16 @@ namespace cnuctran
 
     };
 
+    const mpreal __two__ = mpreal("2.0");
+    const mpreal __one__ = mpreal("1.0");
+    const mpreal __neg__ = mpreal("-1.0");
+    const mpreal __zer__ = mpreal("0.0");
     /*
-        Trims species name string. Removes non-alphanumeric characters from the specified string.
+        Trims species name std::string. Removes non-alphanumeric characters from the specified std::string.
     */
-    static string beautify(string& s)
+    static std::string beautify(std::string& s)
     {
-        string rv = "";
+        std::string rv = "";
         for (auto& c : s)
             if (isalnum(c) || c == '_')
                 rv += c;
