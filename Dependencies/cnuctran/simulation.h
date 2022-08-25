@@ -501,7 +501,6 @@ namespace cnuctran {
                 case errex::MISSING_W0_SOURCE:
                     cout << "fatal-error <cnuctran::simulation::from_input()> Could not open the initial nuclide concentrations XML file." << endl;
                     exit(1);
-
                 default:
                     cout << "fatal-error <cnuctran::simulation::from_input()> Unexpected error has occurred." << endl;
                     exit(1);
