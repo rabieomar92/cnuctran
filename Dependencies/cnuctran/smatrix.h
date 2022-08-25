@@ -7,8 +7,8 @@
 
       Copyright (c) 2022 M. R. Omar
 
-      This header file contains  the  definitions of SMATRIX class.  SMATRIX enables fast, 
-      parallelized and accurate sparse binary exponentiation using the arbitrary precision 
+      This header file contains  the  definitions of SMATRIX class.  SMATRIX enables fast,
+      parallelized and accurate sparse binary exponentiation using the arbitrary precision
       floating-point library, MPFR.
 
  */
@@ -21,11 +21,12 @@
 #include <unordered_map>
 #include <cnuctran/cnuctran.h>
 #include <ppl.h>
+#include <concurrent_unordered_map.h>
 
 using namespace mpfr;
 using namespace concurrency;
 
-std::mutex mtx;
+
 
 namespace cnuctran
 {
@@ -35,16 +36,16 @@ namespace cnuctran
     public:
 
         std::pair<int, int> shape;
-        map_2d nzel;
+        cmap_2d nzel;
 
         /*
             Constructor definitions.
         */
         smatrix(void) { return; }
         smatrix(std::pair<int, int> shape) { this->shape = shape; return; }
-        smatrix(std::pair<int, int> shape, map_2d& A) 
-        { 
-            this->shape = shape; this->nzel = A; return; 
+        smatrix(std::pair<int, int> shape, cmap_2d& A)
+        {
+            this->shape = shape; this->nzel = A; return;
         }
 
         smatrix copy()
@@ -71,23 +72,44 @@ namespace cnuctran
             }
             return result;
         }
-        
-        
+
+        smatrix ssmul(void)
+        {
+            smatrix result(shape);
+            auto& r = result.nzel;
+
+            //for (row = 0; row < shape.first; row++)
+            for (auto& [a1, a2] : nzel)
+            {
+                //auto& c = result.nzel[row];
+                cmap_1d c;
+                for (const auto& [k1, v1] : a2)
+                    for (const auto& [k2, v2] : nzel[k1])
+                        c[k2] += v1 * v2;
+                r[a1] = c;
+            }
+
+            return result;
+            
+        }
+
         smatrix smul(void)
         {
             smatrix result(shape);
             auto& r = result.nzel;
-            parallel_for_each(begin(nzel), end(nzel), [&](std::pair<int, map_1d> p)
+            parallel_for_each(nzel.begin(), nzel.end(), [&](std::pair<int, cmap_1d> p)
                 {
-                    map_1d c;
+                    mpreal::set_default_prec(digits2bits(__dps__));
+                    cmap_1d c;
+                    
                     for (const auto& [k1, v1] : p.second)
                         for (const auto& [k2, v2] : nzel[k1])
                             c[k2] += v1 * v2;
-                    mtx.lock();
+                              
                     r[p.first] = c;
-                    mtx.unlock();
-                });  
-          
+
+                });
+
             return result;
 
         }
