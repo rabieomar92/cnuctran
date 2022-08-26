@@ -56,7 +56,7 @@ namespace cnuctran {
             xml_parse_result open_success = file.load_file(xml_data_location.c_str());
             if (!open_success)
             {
-                cout << "ERROR <cnuctran::depletion_scheme::build_chains(...)> Fail retrieving data from " << xml_data_location << "." << endl;
+                cout << "ERROR <cnuctran::depletion_scheme::build_chains(...)>\n\nFail retrieving data from " << xml_data_location << "." << endl;
                 return;
             }
 
@@ -216,7 +216,7 @@ namespace cnuctran {
             xml_parse_result open_success = file.load_file(xml_data_location.c_str());
             if (!open_success)
             {
-                cout << "ERROR <cnuctran::depletion_scheme::get_nuclide_names(...)> Fail retrieving data from " << xml_data_location << "." << endl;
+                cout << "ERROR <cnuctran::depletion_scheme::get_nuclide_names(...)>\nFail retrieving data from " << xml_data_location << "." << endl;
                 return vector<string>();
             }
 
@@ -261,7 +261,7 @@ namespace cnuctran {
                 xml_document input_file;
                 xml_parse_result open_success = input_file.load_file(xml_input.c_str());
                 if (!open_success) {
-                    cout << "fatal-error <cnuctran::simulation::from_input()> " << open_success.description() << endl;
+                    cout << "fatal-error <cnuctran::simulation::from_input()>\n" << open_success.description() << endl;
                     exit(1);
                 }
                 xml_node root = input_file.child("problem");
@@ -295,7 +295,7 @@ namespace cnuctran {
                 if (precision_digits < 30)
                 {
                     precision_digits = 30;
-                    cout << "warning <cnuctran::simulation::from_input()> A precision < 30 digits is vulnerable to errorneous arithmetics that lead to fatal error." << endl;
+                    cout << "warning <cnuctran::simulation::from_input()>\nA precision < 30 digits is vulnerable to errorneous arithmetics that lead to fatal error." << endl;
                     cout << "The precision was set to 30 digits." << endl;
                 }
 
@@ -358,14 +358,14 @@ namespace cnuctran {
                                 AMin = stoi(zone.child("species").attribute("amin").value());
                             else
                             {
-                                cout << "warning <cnuctran::simulation::from_input()> AMin attribute is missing. Considering all nuclides with A > 0." << endl;
+                                cout << "warning <cnuctran::simulation::from_input()>\nAMin attribute is missing. Considering all nuclides with A > 0." << endl;
                                 AMin = 0;
                             }
                             if (strlen(zone.child("species").attribute("amax").value()) > 0)
                                 AMax = stoi(zone.child("species").attribute("amax").value());
                             else
                             {
-                                cout << "warning <cnuctran::simulation::from_input()> AMin attribute is missing. Considering all nuclides with A > 0." << endl;
+                                cout << "warning <cnuctran::simulation::from_input()>\nAMin attribute is missing. Considering all nuclides with A > 0." << endl;
                                 AMax = 400;
                             }
                             species_names = get_nuclide_names(zone.child("species").attribute("source").value(), AMin, AMax);
@@ -376,18 +376,19 @@ namespace cnuctran {
                     }
                     else
                     {
+                        
                         stringstream ss = stringstream(species); string token;
                         while (getline(ss, token, ' '))
                         {
-                            if (token != "")
-                                species_names.push_back(token);
+                            token.erase(std::remove_if(token.begin(), token.end(), ispunct), token.end());
+                            if (token != "") species_names.push_back(trim(token));
                         }
                     }
 
                     //..................Reads the initial concentrations for each zone.
                     std::map<std::string, mpreal> w0;
                     const char* w0_source = zone.child("initial_concentrations").attribute("source").value();
-                    const char* override_species_names = zone.child("initial_concentrations").attribute("override_species_names").value();
+                    const char* override_species_names = zone.child("initial_concentrations").attribute("override").value();
                     if (w0_source != "")
                     {
                         xml_document w0_doc;
@@ -443,7 +444,7 @@ namespace cnuctran {
 
                     for (xml_node reaction : zone.child("reaction_rates").children())
                     {
-                        mpreal rate = mpreal(reaction.child_value());
+                        mpreal rate = mpreal(reaction.attribute("rate").value());
                         rxn_rates[reaction.attribute("species").value()][reaction.attribute("type").value()] = rate;
                         if (__vbs__ == 2) cout << "input<rxn_rates> species = " << reaction.attribute("species").value() << " type = " << reaction.attribute("type").value() << " rate = " << rate << endl;
                     }
@@ -481,28 +482,28 @@ namespace cnuctran {
                 switch (e)
                 {
                 case errex::MISSING_SUBSTEP_SIZE:
-                    cout << "fatal-error <cnuctran::simulation::from_input()> Precision order, n, is not supplied." << endl;
+                    cout << "fatal-error <cnuctran::simulation::from_input()>\nPrecision order, n, is not supplied." << endl;
                     exit(1);
                 case errex::MISSING_STEP_SIZE:
-                    cout << "fatal-error <cnuctran::simulation::from_input()> Time step, t, is not supplied." << endl;
+                    cout << "fatal-error <cnuctran::simulation::from_input()>\nTime step, t, is not supplied." << endl;
                     exit(1);
                 case errex::MISSING_SPECIES_NAMES:
-                    cout << "fatal-error <cnuctran::simulation::from_input()> Species names are not supplied." << endl;
+                    cout << "fatal-error <cnuctran::simulation::from_input()>\nSpecies names are not supplied." << endl;
                     exit(1);
                 case errex::MISSING_W0:
-                    cout << "fatal-error <cnuctran::simulation::from_input()> Initial nuclide concentrations are not supplied." << endl;
+                    cout << "fatal-error <cnuctran::simulation::from_input()>\nInitial nuclide concentrations are not supplied." << endl;
                     exit(1);
                 case errex::NUCLIDES_DATA_LOAD_FAILED:
-                    cout << "fatal-error <cnuctran::simulation::from_input()> Could open source file." << endl;
+                    cout << "fatal-error <cnuctran::simulation::from_input()>\nCould open source file." << endl;
                     exit(1);
                 case errex::XML_READING_ERROR:
-                    cout << "fatal-error <cnuctran::simulation::from_input()> An error has occurred while reading the XML input file: " << xml_input << endl;
+                    cout << "fatal-error <cnuctran::simulation::from_input()>\nAn error has occurred while reading the XML input file: " << xml_input << endl;
                     exit(1);
                 case errex::MISSING_W0_SOURCE:
-                    cout << "fatal-error <cnuctran::simulation::from_input()> Could not open the initial nuclide concentrations XML file." << endl;
+                    cout << "fatal-error <cnuctran::simulation::from_input()>\nCould not open the initial nuclide concentrations XML file." << endl;
                     exit(1);
                 default:
-                    cout << "fatal-error <cnuctran::simulation::from_input()> Unexpected error has occurred." << endl;
+                    cout << "fatal-error <cnuctran::simulation::from_input()>\nUnexpected error has occurred." << endl;
                     exit(1);
                 }
             }
