@@ -18,60 +18,70 @@
 
 
 #include <iostream>
+#include <mpfr.h>
+#include <mpir.h>
 #include <mpreal.h>
 #include <cnuctran/smatrix.h>
 #include <cnuctran/cnuctran.h>
 #include <chrono>
 #include <map>
 #include <unordered_map>
+#include <concurrent_unordered_map.h>
 
-
+using namespace std;
 using namespace mpfr;
 
 namespace cnuctran
 {
-    
+
     /*
             This class was initially developed to facilitate fast, high-precision sparse
             matrix multiplications and powers. WARNING! This class does not covers all
             matrix operations, it only cover the basic operations used by CNUCTRAN, i.e.
             Multiplication and Powers.
 
+            Of course, there is still no known library that provides high-precision sparse
+            matrix operations. Therefore, I must endure writing a new specialized class
+            handling sparse matrix power to preserve the accuracy.
+
     */
 
     class solver
     {
     public:
-
-        std::vector<std::string> species_names;
+        const mpreal __two__ = mpreal("2.0");
+        const mpreal __one__ = mpreal("1.0");
+        const mpreal __neg__ = mpreal("-1.0");
+        const mpreal __zer__ = mpreal("0.0");
+        vector<string> species_names;
         int __I__;
-        std::vector<std::vector<mpreal>> lambdas;
-        std::vector<std::vector<std::vector<int>>> G;
-        std::vector<std::vector<mpreal>> fission_yields;
+        vector<vector<mpreal>> lambdas;
+        vector<vector<vector<int>>> G;
+        vector<vector<mpreal>> fission_yields;
 
-        solver(std::vector<std::string> species_names)
+        solver(vector<string> species_names)
         {
             this->species_names = species_names;
             this->__I__ = this->species_names.size();
             for (int i = 0; i < this->__I__; i++)
             {
-                this->lambdas.push_back(std::vector<mpreal>());
-                std::vector<int> tmp1 = { __nop__ }; std::vector<std::vector<int>> tmp2; tmp2.push_back(tmp1);
+                this->lambdas.push_back(vector<mpreal>());
+                vector<int> tmp1 = { __nop__ }; vector<vector<int>> tmp2; tmp2.push_back(tmp1);
                 this->G.push_back(tmp2);
-                this->fission_yields.push_back(std::vector<mpreal>());
+                this->fission_yields.push_back(vector<mpreal>());
             }
             return;
         }
 
         void add_removal(int species_index,
             mpreal rate,
-            std::vector<int> products,
-            std::vector<mpreal> fission_yields = std::vector<mpreal>({}))
+            vector<int> products,
+            vector<mpreal> fission_yields = vector<mpreal>({}))
         {
 
 
-//..........Skips adding a removal if the removal rate is outside of the range
-//          specified by the input file.
+            //..........Skips adding a removal if the removal rate is outside of the range
+            //          specified by the input file.
             if (rate < __mnr__ || rate > __mxr__)
                 return;
 
@@ -82,19 +92,19 @@ namespace cnuctran
             {
                 if (fission_yields.size() >= products.size())
                 {
-                    std::vector<mpreal> tmp = std::vector<mpreal>();
+                    vector<mpreal> tmp = vector<mpreal>();
                     for (mpreal y : fission_yields)
                         tmp.push_back(y);
                     this->fission_yields[species_index] = tmp;
                 }
                 else
                 {
-                    std::cout << "FATAL-ERROR\t<cnuctran::solver::add_removal(...)> Insufficient fission yields given for species " <<
+                    cout << "fatal-error <cnuctran.solver.add_removal(...)>\nInsufficient fission yields given for species " <<
                         this->species_names[species_index] << " products.";
                     exit(1);
                 }
             }
-            else if ((fission_yields.empty() && products.size() == 1) || (fission_yields.size() == 1 && products.size() == 1))
+            else if (fission_yields.empty() && products.size() == 1)
             {
                 for (int product : products)
                 {
@@ -104,10 +114,10 @@ namespace cnuctran
             }
             else
             {
-                std::cout << "FATAL-ERROR\t<cnuctran::solver::add_removal(...)> Invalid removal definition for isotope " <<
-                    this->species_names[species_index] << std::endl;
-                std::cout << "INFO\tNon-fission events MUST only have ONE daughter product." << std::endl;
-                std::cout << "INFO\tWhereas fission events MUST have >1 products to track." << std::endl;
+                cout << "fatal-error <cnuctran.solver.add_removal(...)>\nInvalid removal definition for isotope " <<
+                    this->species_names[species_index] << endl;
+                cout << "Non-fission events MUST only have ONE daughter product." << endl;
+                cout << "Whereas fission events MUST have >1 products to track." << endl;
                 exit(1);
 
             }
@@ -115,15 +125,16 @@ namespace cnuctran
 
         smatrix prepare_transfer_matrix(mpreal dt)
         {
-            std::unordered_map<int, std::unordered_map<int, mpreal, modified_hash>, modified_hash> A;
-            std::unordered_map<int, std::unordered_map<int, mpreal, modified_hash>, modified_hash> P;
+            cmap_2d A;
+            cmap_2d P;
             int i;
 
-            std::unordered_map<int, mpreal, modified_hash> e;
+            unordered_map<int, mpreal, modified_hash> e;
+           
             for (i = 0; i < this->__I__; i++)
             {
-//..............Clears the exponentials container, e, and retrieves the total number of
-//              events associated to nuclide-i.
+                //..............Clears the exponentials container, e, and retrieves the total number of
+                //              events associated to nuclide-i.
                 e.clear();
                 const int n_events = this->G[i].size();
 
@@ -134,7 +145,7 @@ namespace cnuctran
                 for (int l = 1; l < n_events; l++)
                     e.emplace(l - 1, exp(-this->lambdas[i][l - 1] * dt));
 
-//..............Constructs the pi-distribution.
+                //..............Constructs the pi-distribution.
                 for (int j = 0; j < n_events; j++)
                 {
 
@@ -150,7 +161,7 @@ namespace cnuctran
                 if (norm == __zer__)
                     continue;
 
-//..............Constructs the transfer matrix.
+                //..............Constructs the transfer matrix.
                 auto const& gI = G[i];
                 for (int j = 0; j < n_events; j++)
                 {
@@ -163,8 +174,8 @@ namespace cnuctran
                         auto const& k = gJ[l];
                         if (k != __nop__)
                         {
-                            n_daughters > 1? A[k][i] += a * fission_yields[i][l]:
-                                 A[k][i] += a;
+                            n_daughters > 1 ? A[k][i] += a * fission_yields[i][l] :
+                                A[k][i] += a;
                         }
                     }
 
@@ -173,47 +184,42 @@ namespace cnuctran
                 }
             }
 
-            return smatrix({this->__I__, this->__I__ }, A);
+
+            return smatrix({ this->__I__, this->__I__ }, A);
         }
 
-        std::map<std::string, mpreal> solve(std::map<std::string, mpreal> w0,
+        map<string, mpreal> solve(map<string, mpreal> w0,
             mpreal n,
             mpreal t)
         {
-            std::unordered_map<int, std::unordered_map<int, mpreal, modified_hash>, modified_hash> w0_matrix;
+            cmap_2d w0_matrix;
             for (int i = 0; i < this->__I__; i++)
                 if (w0.count(this->species_names[i]) == 1)
                     w0_matrix[i][0] = w0[this->species_names[i]];
-            smatrix converted_w0 = smatrix(std::pair<int, int>(this->__I__, 1), w0_matrix);
+            smatrix converted_w0 = smatrix(pair<int, int>(this->__I__, 1), w0_matrix);
 
-//..........Auto suggest the no. of substeps.
+            //..........Auto suggest the no. of substeps.
             int k = int(floor(log(t / pow(mpreal("10"), -n)) / log(__two__)));
-            mpreal suggested_substeps = pow(__two__, k);
-            mpz_t substeps; mpz_set_str(substeps, suggested_substeps.toString().c_str(), 10);
 
-//..........Compute the transfer matrix power.
-            if (__vbs__) std::cout << "INFO\ttime-step = " << t << " sec(s)."  << std::endl;
-            if (__vbs__) std::cout << "INFO\tmax-rate = " << __mxr__ << " per sec.\tmin-rate = " << __mnr__ << " per sec." << std::endl;
-            auto t1 = std::chrono::high_resolution_clock::now();
-            smatrix T = this->prepare_transfer_matrix(t / suggested_substeps);
+            //..........Compute the transfer matrix power.
+            if (__vbs__) cout << "time-step = " << t << endl;
+            if (__vbs__) cout << "max-rate = " << __mxr__ << " per sec.\tmin-rate = " << __mnr__ << " per sec." << endl;
+            auto t1 = chrono::high_resolution_clock::now();
+            smatrix T = this->prepare_transfer_matrix(t / pow(__two__, k));
 
-            auto t2 = std::chrono::high_resolution_clock::now();
-            smatrix U = T.binpow(k);
-            smatrix w = U.mul(converted_w0);
-            auto t3 = std::chrono::high_resolution_clock::now();
-            if (__vbs__) std::cout << "INFO\tDone computing concentrations.";
-            if (__vbs__) std::cout << " (" <<
-                std::chrono::duration_cast<std::chrono::milliseconds>(t3 - t2).count() << "ms. for " << k << " mults.)" << std::endl;
+            auto t2 = chrono::high_resolution_clock::now();
+            //..........Compute the matrix exponentiation and multiply with w0 to obtain w.
+            smatrix w = T.binpow(k).mul(converted_w0);
+            auto t3 = chrono::high_resolution_clock::now();
+            if (__vbs__) cout << "Done computing concentrations. ";
+            if (__vbs__) cout << chrono::duration_cast<chrono::milliseconds>(t3 - t1).count() << "ms. (" <<
+                chrono::duration_cast<chrono::milliseconds>(t3 - t2).count() << "ms. for " << k << " mults.)" << endl;
 
-            std::map<std::string, mpreal> out;
+            map<string, mpreal> out;
             for (int i = 0; i < this->__I__; i++)
                 out[this->species_names[i]] = w.nzel[i][0];
-
             return out;
         }
-
-    
-       
     };
 }
 
