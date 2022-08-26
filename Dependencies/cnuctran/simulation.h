@@ -18,15 +18,11 @@
 
 #include <iostream>
 #include <iomanip>
-#include <mpfr.h>
-#include <mpir.h>
 #include <mpreal.h>
 #include <map>
-#include <unordered_map>
 #include <vector>
 #include <fstream>
 #include <pugixml/pugixml.hpp>
-#include <thread>
 #include <cnuctran/smatrix.h>
 #include <cnuctran/solver.h>
 #include <cnuctran/cnuctran.h>
@@ -36,7 +32,6 @@
 using namespace pugi;
 using namespace mpfr;
 using namespace std;
-using namespace concurrency;
 
 namespace cnuctran {
 
@@ -56,7 +51,7 @@ namespace cnuctran {
             xml_parse_result open_success = file.load_file(xml_data_location.c_str());
             if (!open_success)
             {
-                cout << "ERROR <cnuctran::depletion_scheme::build_chains(...)>\n\nFail retrieving data from " << xml_data_location << "." << endl;
+                cout << "ERROR <cnuctran.depletion_scheme.build_chains(...)>\n\nFail retrieving data from " << xml_data_location << "." << endl;
                 return;
             }
 
@@ -66,7 +61,7 @@ namespace cnuctran {
             for (xml_node species : root.children())
             {
                 string species_name = species.attribute("name").value();
-                vector<string>::iterator it = std::find(species_names.begin(), species_names.end(), species_name);
+                auto it = find(species_names.begin(), species_names.end(), species_name);
                 if (it == species_names.end())
                     continue;
 
@@ -84,9 +79,9 @@ namespace cnuctran {
                         mpreal decay_rate_adjusted = mpreal(removal.attribute("branching_ratio").value()) * decay_rate;
                         string parent = species_name;
                         string daughter = removal.attribute("target").value();
-                        vector<string>::iterator it_parent = std::find(species_names.begin(), species_names.end(), parent);
+                        auto it_parent = find(species_names.begin(), species_names.end(), parent);
                         int parent_id = distance(species_names.begin(), it_parent);
-                        vector<string>::iterator it_daughter = std::find(species_names.begin(), species_names.end(), daughter);
+                        auto it_daughter = find(species_names.begin(), species_names.end(), daughter);
                         if (it_daughter != species_names.end())
                         {
                             int daughter_id = distance(species_names.begin(), it_daughter);
@@ -106,14 +101,14 @@ namespace cnuctran {
                             if (string(removal.name()) == "reaction_type" && removal.attribute("target"))
                             {
                                 string parent = species_name;
-                                vector<string>::iterator it_parent = std::find(species_names.begin(), species_names.end(), parent);
+                                auto it_parent = find(species_names.begin(), species_names.end(), parent);
                                 int parent_id = distance(species_names.begin(), it_parent);
                                 if (rxn_rates[parent].count(removal.attribute("type").value()) &&
                                     removal.attribute("type").value() != "fission")
                                 {
                                     string daughter = removal.attribute("target").value();
                                     mpreal removal_rate = mpreal(rxn_rates[parent][removal.attribute("type").value()]);
-                                    vector<string>::iterator it_daughter = std::find(species_names.begin(), species_names.end(), daughter);
+                                    auto it_daughter = find(species_names.begin(), species_names.end(), daughter);
                                     if (it_daughter != species_names.end())
                                     {
                                         int daughter_id = distance(species_names.begin(), it_daughter);
@@ -129,7 +124,7 @@ namespace cnuctran {
                             if (string(removal.name()) == "neutron_fission_yields")
                             {
                                 string parent = species_name;
-                                vector<string>::iterator it_parent = std::find(species_names.begin(), species_names.end(), parent);
+                                auto it_parent = find(species_names.begin(), species_names.end(), parent);
                                 int parent_id = distance(species_names.begin(), it_parent);
                                 mpreal energy = mpreal("0");
                                 vector<string> products;
@@ -216,7 +211,7 @@ namespace cnuctran {
             xml_parse_result open_success = file.load_file(xml_data_location.c_str());
             if (!open_success)
             {
-                cout << "ERROR <cnuctran::depletion_scheme::get_nuclide_names(...)>\nFail retrieving data from " << xml_data_location << "." << endl;
+                cout << "ERROR <cnuctran::depletion_scheme.get_nuclide_names(...)>\nFail retrieving data from " << xml_data_location << "." << endl;
                 return vector<string>();
             }
 
@@ -261,7 +256,7 @@ namespace cnuctran {
                 xml_document input_file;
                 xml_parse_result open_success = input_file.load_file(xml_input.c_str());
                 if (!open_success) {
-                    cout << "fatal-error <cnuctran::simulation::from_input()>\n" << open_success.description() << endl;
+                    cout << "fatal-error <cnuctran.simulation.from_input()>\n" << open_success.description() << endl;
                     exit(1);
                 }
                 xml_node root = input_file.child("problem");
@@ -295,7 +290,7 @@ namespace cnuctran {
                 if (precision_digits < 30)
                 {
                     precision_digits = 30;
-                    cout << "warning <cnuctran::simulation::from_input()>\nA precision < 30 digits is vulnerable to errorneous arithmetics that lead to fatal error." << endl;
+                    cout << "warning <cnuctran.simulation.from_input()>\nA precision < 30 digits is vulnerable to errorneous arithmetics that lead to fatal error." << endl;
                     cout << "The precision was set to 30 digits." << endl;
                 }
 
@@ -358,14 +353,14 @@ namespace cnuctran {
                                 AMin = stoi(zone.child("species").attribute("amin").value());
                             else
                             {
-                                cout << "warning <cnuctran::simulation::from_input()>\nAMin attribute is missing. Considering all nuclides with A > 0." << endl;
+                                cout << "warning <cnuctran.simulation.from_input()>\nAMin attribute is missing. Considering all nuclides with A > 0." << endl;
                                 AMin = 0;
                             }
                             if (strlen(zone.child("species").attribute("amax").value()) > 0)
                                 AMax = stoi(zone.child("species").attribute("amax").value());
                             else
                             {
-                                cout << "warning <cnuctran::simulation::from_input()>\nAMin attribute is missing. Considering all nuclides with A > 0." << endl;
+                                cout << "warning <cnuctran.simulation.from_input()>\nAMin attribute is missing. Considering all nuclides with A > 0." << endl;
                                 AMax = 400;
                             }
                             species_names = get_nuclide_names(zone.child("species").attribute("source").value(), AMin, AMax);
@@ -380,13 +375,13 @@ namespace cnuctran {
                         stringstream ss = stringstream(species); string token;
                         while (getline(ss, token, ' '))
                         {
-                            token.erase(std::remove_if(token.begin(), token.end(), ispunct), token.end());
+                            token.erase(remove_if(token.begin(), token.end(), ispunct), token.end());
                             if (token != "") species_names.push_back(trim(token));
                         }
                     }
 
                     //..................Reads the initial concentrations for each zone.
-                    std::map<std::string, mpreal> w0;
+                    map<string, mpreal> w0;
                     const char* w0_source = zone.child("initial_concentrations").attribute("source").value();
                     const char* override_species_names = zone.child("initial_concentrations").attribute("override").value();
                     if (w0_source != "")
@@ -399,13 +394,13 @@ namespace cnuctran {
                             for (xml_node concs : w0_doc.child("output").children())
                             {
 
-                                if (std::string(concs.name()) != "species_concentrations") continue;
-                                if (std::string(concs.attribute("zone").value()) != std::string(zone.attribute("name").value())) continue;
-                                if (__vbs__) std::cout << "Reading the initial nuclide concentrations from " << w0_source << " for zone '" << concs.attribute("zone").value() << "'." << std::endl;
+                                if (string(concs.name()) != "species_concentrations") continue;
+                                if (string(concs.attribute("zone").value()) != string(zone.attribute("name").value())) continue;
+                                if (__vbs__) cout << "Reading the initial nuclide concentrations from " << w0_source << " for zone '" << concs.attribute("zone").value() << "'." << endl;
                                 for (xml_node nuclide : concs)
                                 {
-                                    if (std::string(nuclide.name()) != "concentration") continue;
-                                    std::string name = nuclide.attribute("species").value();
+                                    if (string(nuclide.name()) != "concentration") continue;
+                                    string name = nuclide.attribute("species").value();
                                     mpreal concentration = mpreal(nuclide.attribute("value").value());
                                     if (override_species_names == "true")
                                     {
@@ -432,10 +427,10 @@ namespace cnuctran {
                         if (!zone.child("initial_concentrations").child_value()) throw (int)errex::MISSING_W0;
                         for (xml_node item : zone.child("initial_concentrations").children())
                         {
-                            if (std::string(item.name()) != "concentration") continue;
+                            if (string(item.name()) != "concentration") continue;
                             mpreal concentration = mpreal(item.attribute("value").value());
                             w0[item.attribute("species").value()] = concentration;
-                            if (__vbs__ == 2) std::cout << "INPUT\t<initial_concentrations> species = " << item.attribute("species").value() << " w0 = " << concentration << std::endl;
+                            if (__vbs__ == 2) cout << "INPUT\t<initial_concentrations> species = " << item.attribute("species").value() << " w0 = " << concentration << endl;
                         }
                     }
 
@@ -482,28 +477,28 @@ namespace cnuctran {
                 switch (e)
                 {
                 case errex::MISSING_SUBSTEP_SIZE:
-                    cout << "fatal-error <cnuctran::simulation::from_input()>\nPrecision order, n, is not supplied." << endl;
+                    cout << "fatal-error <cnuctran.simulation.from_input()>\nPrecision order, n, is not supplied." << endl;
                     exit(1);
                 case errex::MISSING_STEP_SIZE:
-                    cout << "fatal-error <cnuctran::simulation::from_input()>\nTime step, t, is not supplied." << endl;
+                    cout << "fatal-error <cnuctran.simulation.from_input()>\nTime step, t, is not supplied." << endl;
                     exit(1);
                 case errex::MISSING_SPECIES_NAMES:
-                    cout << "fatal-error <cnuctran::simulation::from_input()>\nSpecies names are not supplied." << endl;
+                    cout << "fatal-error <cnuctran.simulation.from_input()>\nSpecies names are not supplied." << endl;
                     exit(1);
                 case errex::MISSING_W0:
-                    cout << "fatal-error <cnuctran::simulation::from_input()>\nInitial nuclide concentrations are not supplied." << endl;
+                    cout << "fatal-error <cnuctran.simulation.from_input()>\nInitial nuclide concentrations are not supplied." << endl;
                     exit(1);
                 case errex::NUCLIDES_DATA_LOAD_FAILED:
-                    cout << "fatal-error <cnuctran::simulation::from_input()>\nCould open source file." << endl;
+                    cout << "fatal-error <cnuctran.simulation.from_input()>\nCould open source file." << endl;
                     exit(1);
                 case errex::XML_READING_ERROR:
-                    cout << "fatal-error <cnuctran::simulation::from_input()>\nAn error has occurred while reading the XML input file: " << xml_input << endl;
+                    cout << "fatal-error <cnuctran.simulation.from_input()>\nAn error has occurred while reading the XML input file: " << xml_input << endl;
                     exit(1);
                 case errex::MISSING_W0_SOURCE:
-                    cout << "fatal-error <cnuctran::simulation::from_input()>\nCould not open the initial nuclide concentrations XML file." << endl;
+                    cout << "fatal-error <cnuctran.simulation.from_input()>\nCould not open the initial nuclide concentrations XML file." << endl;
                     exit(1);
                 default:
-                    cout << "fatal-error <cnuctran::simulation::from_input()>\nUnexpected error has occurred." << endl;
+                    cout << "fatal-error <cnuctran.simulation.from_input()>\nUnexpected error has occurred." << endl;
                     exit(1);
                 }
             }
