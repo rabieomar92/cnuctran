@@ -73,15 +73,14 @@ namespace cnuctran
             return result;
         }
 
-        smatrix ssmul(void)
+        // Serial implementation of self sparse multiplication. This routine is depricated.
+        smatrix smul_depricated(void)
         {
             smatrix result(shape);
             auto& r = result.nzel;
 
-            //for (row = 0; row < shape.first; row++)
             for (auto& [a1, a2] : nzel)
             {
-                //auto& c = result.nzel[row];
                 cmap_1d c;
                 for (const auto& [k1, v1] : a2)
                     for (const auto& [k2, v2] : nzel[k1])
@@ -93,36 +92,41 @@ namespace cnuctran
             
         }
 
+
+        // Parallel implementation of self sparse multiplication.
         smatrix smul(void)
         {
             smatrix result(shape);
             auto& r = result.nzel;
+            auto bits = digits2bits(__dps__);
             parallel_for_each(nzel.begin(), nzel.end(), [&](std::pair<int, cmap_1d> p)
                 {
-                    mpreal::set_default_prec(digits2bits(__dps__));
+                    mpreal::set_default_prec(bits);
                     cmap_1d c;
                     
                     for (const auto& [k1, v1] : p.second)
-                        for (const auto& [k2, v2] : nzel[k1])
+                        for (const auto& [k2, v2] : nzel[k1]) {
                             c[k2] += v1 * v2;
-                              
+                    
+                    }
                     r[p.first] = c;
 
-                });
+                }, auto_partitioner());
 
             return result;
 
         }
 
+
+        // Implementation of exponentiation by squaring.
         smatrix binpow(int k)
         {
             auto r = copy();
             for (int i = 1; i <= k; i++)
-            {
                 r = r.smul();
-            }
             return r;
         }
+
     };
 }
 
