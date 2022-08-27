@@ -22,9 +22,7 @@ It is also possible to simulate the actual transmutation processes using Monte C
 
 - Friendly to all physicists! In order to understand the method implemented in CNUCTRAN, you only need to know <a href="https://en.wikipedia.org/wiki/Poisson_distribution" target=_blank>Poisson distribution</a> and <a href="https://en.wikipedia.org/wiki/Matrix_multiplication" target=_blank>matrix multiplications</a>! Free from math jargons, hard-to-understand algorithms and approximations.
 - Capable of simulating complex transmutation chains.
-- Helps nuclear physics students to understands transmutation processes through simulations. They can create, study and design any depletion chains and simulate the transmutations.
-
-If you don't prefer dealing with complicated mathematical methods to solve Bateman's equations,  give CNUCTRAN a try!
+- Helps nuclear physics students to understand transmutation processes through simulations. They can create, study and design any depletion chains and simulate the transmutations.
 
 ## Program Flow
 The program package consists of four (4) important files in order to run smoothly. They are the input file (input.XML) which consists of the problem definition set by the user; cnuctran.exe which is the executable of the compiled CNUCTRAN C++ codes; and finally, mpfr.dll and mpir.dll which are the dependencies of CNUCTRAN to enable high-precision arithmetics. Firstly, cnuctran.exe will read the simulation parameters defined in input.XML, including the arithmetic precision level. Here, the precision is defined in terms of the number of significant digits, n_sig, which can be set via the ```<precision_digits>n_sig</precision_digits>``` tag, inside the  ```<simulation_params></simulation_params>``` node. 
