@@ -211,7 +211,7 @@ namespace cnuctran {
             xml_parse_result open_success = file.load_file(xml_data_location.c_str());
             if (!open_success)
             {
-                cout << "ERROR <cnuctran::depletion_scheme.get_nuclide_names(...)>\nFail retrieving data from " << xml_data_location << "." << endl;
+                cout << "ERROR <cnuctran.depletion_scheme.get_nuclide_names(...)>\nFail retrieving data from " << xml_data_location << "." << endl;
                 return vector<string>();
             }
 
@@ -271,7 +271,7 @@ namespace cnuctran {
                 const char_t* tmp;
                 int AMin = -1;
                 int AMax = -1;
-                string output_location = "";
+                string output_location = "./output.xml";
 
                 //Obtains the verbosity level from the input file.
                 tmp = root.child("simulation_params").child("verbosity").child_value();
@@ -394,7 +394,7 @@ namespace cnuctran {
                             for (xml_node concs : w0_doc.child("output").children())
                             {
 
-                                if (string(concs.name()) != "species_concentrations") continue;
+                                if (string(concs.name()) != "nuclide_concentrations") continue;
                                 if (string(concs.attribute("zone").value()) != string(zone.attribute("name").value())) continue;
                                 if (__vbs__) cout << "Reading the initial nuclide concentrations from " << w0_source << " for zone '" << concs.attribute("zone").value() << "'." << endl;
                                 for (xml_node nuclide : concs)
@@ -458,7 +458,7 @@ namespace cnuctran {
                         mpreal c = w[species];
                         if (c > __eps__)
                         {
-                            ss << "\t\t<nuclide name=\"" << species << "\">" << scientific << setprecision(output_digits) << w[species] << "</nuclide>" << endl;
+                            ss << "\t\t<concentration species=\"" << species << "\" value=\"" << scientific << setprecision(output_digits) << w[species] << "\" />" << endl;
                         }
                     }
                     ss << "\t</nuclide_concentrations>" << endl;
