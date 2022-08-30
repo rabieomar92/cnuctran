@@ -54,7 +54,7 @@ namespace cnuctran
     const mpreal __eps__ = mpreal("1e-200", digits2bits(50));
     double __mnr__ = 1e-200;
     double __mxr__ = 1e+200;
-    int    __dps__ = 200;
+    int    __dps__ = 45;
     const int    __dop__ = 16;
     const int    __npr__ = 1;
     const int    __nop__ = -1;
