@@ -93,7 +93,7 @@ namespace cnuctran
         }
 
 
-        // Parallel implementation of self sparse multiplication.
+        // Parallel implementation of self sparse matrix-matrix multiplication.
         smatrix smul(void)
         {
             smatrix result(shape);
@@ -105,9 +105,10 @@ namespace cnuctran
                     cmap_1d c;
                     
                     for (const auto& [k1, v1] : p.second)
-                        for (const auto& [k2, v2] : nzel[k1])
+                        for (const auto& [k2, v2] : nzel[k1]) {
                             c[k2] += v1 * v2;
-
+                    
+                    }
                     r[p.first] = c;
 
                 }, auto_partitioner());
