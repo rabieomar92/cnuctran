@@ -271,7 +271,7 @@ namespace cnuctran {
                 const char_t* tmp;
                 int AMin = -1;
                 int AMax = -1;
-                string output_location = "./output.xml";
+                string output_location = "output.xml";
 
                 //Obtains the verbosity level from the input file.
                 tmp = root.child("simulation_params").child("verbosity").child_value();
@@ -301,6 +301,10 @@ namespace cnuctran {
                 //Obtains the minimum rate from the input file.
                 tmp = root.child("simulation_params").child("max_rate").child_value();
                 if (tmp != "") __mxr__ = mpreal(tmp).toDouble();
+
+                //Obtains the epsilon from the input file.
+                tmp = root.child("simulation_params").child("epsilon").child_value();
+                if (tmp != "") __eps__ = mpreal(tmp);
 
                 //Obtains the output precision digits from the input file.
                 tmp = root.child("simulation_params").child("output_digits").child_value();
@@ -430,7 +434,6 @@ namespace cnuctran {
                             if (string(item.name()) != "concentration") continue;
                             mpreal concentration = mpreal(item.attribute("value").value());
                             w0[item.attribute("species").value()] = concentration;
-                            if (__vbs__ == 2) cout << "INPUT\t<initial_concentrations> species = " << item.attribute("species").value() << " w0 = " << concentration << endl;
                         }
                     }
 
@@ -452,7 +455,7 @@ namespace cnuctran {
 
                     //..................Prints to output file.
                     stringstream ss("");
-                    ss << "\t<nuclide_concentrations zone=\"" << zone.attribute("name").value() << "\" amin = \"" << AMin << "\" amax=\"" << AMax << "\" n=\"" << sol.species_names.size() << "\" time_step=\"" << t << "\">" << endl;
+                    ss << "\t<nuclide_concentrations zone=\"" << zone.attribute("name").value() << "\" amin = \"" << AMin << "\" amax=\"" << AMax << "\" total_nuclides=\"" << sol.species_names.size() << "\" time_step=\"" << t << "\">" << endl;
                     for (string species : sol.species_names)
                     {
                         mpreal c = w[species];
