@@ -51,7 +51,7 @@ namespace cnuctran
 
     */
 
-    const mpreal __eps__ = mpreal("1e-200", digits2bits(50));
+    mpreal __eps__ = mpreal("1e-200", digits2bits(50));
     double __mnr__ = 1e-200;
     double __mxr__ = 1e+200;
     int    __dps__ = 45;
@@ -60,23 +60,12 @@ namespace cnuctran
     const int    __nop__ = -1;
     int          __vbs__ = 0;
 
-
-    /*
-        A modified hash function for the unordered_map.
-        We don't care about hackers, here we want to minimize hashing burden to improve element access.
-        Therefore, the simplest hash function is used - the hash of an integer is the integer itself.
-    */
-    struct modified_hash {
-        static size_t splitmix64(uint8_t x) { return x; }
-        size_t operator()(uint8_t x) const { return x; }
-    };
-
     /*
         Type definition for sparse matrix non-zero elements container.
         The container is a nested unordered map.
     */
-    typedef unordered_map<int, unordered_map<int, mpreal, modified_hash>, modified_hash> map_2d;
-    typedef unordered_map<int, mpreal, modified_hash> map_1d;
+    typedef unordered_map<int, unordered_map<int, mpreal>> map_2d;
+    typedef unordered_map<int, mpreal> map_1d;
     typedef concurrent_unordered_map<int, concurrent_unordered_map<int, mpreal>> cmap_2d;
     typedef concurrent_unordered_map<int, mpreal> cmap_1d;
 
