@@ -30,6 +30,7 @@
 
 using namespace std;
 using namespace mpfr;
+using namespace concurrency;
 
 namespace cnuctran
 {
@@ -66,7 +67,9 @@ namespace cnuctran
             for (int i = 0; i < this->__I__; i++)
             {
                 this->lambdas.push_back(vector<mpreal>());
-                vector<int> tmp1 = { __nop__ }; vector<vector<int>> tmp2; tmp2.push_back(tmp1);
+                vector<int> tmp1; 
+                tmp1.push_back(__nop__);
+                vector<vector<int>> tmp2; tmp2.push_back(tmp1);
                 this->G.push_back(tmp2);
                 this->fission_yields.push_back(vector<mpreal>());
             }
@@ -129,10 +132,12 @@ namespace cnuctran
             cmap_2d P;
             int i;
 
-            unordered_map<int, mpreal, modified_hash> e;
-           
+            unordered_map<int, mpreal> e;
+            
             for (i = 0; i < this->__I__; i++)
             {
+                    
+
                 //..............Clears the exponentials container, e, and retrieves the total number of
                 //              events associated to nuclide-i.
                 e.clear();
@@ -184,7 +189,6 @@ namespace cnuctran
                 }
             }
 
-
             return smatrix({ this->__I__, this->__I__ }, A);
         }
 
@@ -196,14 +200,15 @@ namespace cnuctran
             for (int i = 0; i < this->__I__; i++)
                 if (w0.count(this->species_names[i]) == 1)
                     w0_matrix[i][0] = w0[this->species_names[i]];
+                    
             smatrix converted_w0 = smatrix(pair<int, int>(this->__I__, 1), w0_matrix);
 
             //..........Auto suggest the no. of substeps.
             int k = int(floor(log(t / pow(mpreal("10"), -n)) / log(__two__)));
+            if (__vbs__) cout << "Approximation order, n = " << n << endl;
 
             //..........Compute the transfer matrix power.
-            if (__vbs__) cout << "time-step = " << t << endl;
-            if (__vbs__) cout << "max-rate = " << __mxr__ << " per sec.\tmin-rate = " << __mnr__ << " per sec." << endl;
+            if (__vbs__) cout << "Time step, T = " << t << endl;
             auto t1 = chrono::high_resolution_clock::now();
             smatrix T = this->prepare_transfer_matrix(t / pow(__two__, k));
 
