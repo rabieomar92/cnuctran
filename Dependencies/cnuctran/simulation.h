@@ -444,25 +444,31 @@ namespace cnuctran {
                     {
                         mpreal rate = mpreal(reaction.attribute("rate").value());
                         rxn_rates[reaction.attribute("species").value()][reaction.attribute("type").value()] = rate;
-                        if (__vbs__ == 2) cout << "input<rxn_rates> species = " << reaction.attribute("species").value() << " type = " << reaction.attribute("type").value() << " rate = " << rate << endl;
+                        
                     }
 
                     //..................Runs the simulation.
                     solver sol = solver(species_names);
                     build_chains(sol, rxn_rates, zone.child("species").attribute("source").value());
-                    map<string, mpreal> w;
-                    w = sol.solve(w0, n, t);
+                    auto w = sol.solve(w0, n, t);
 
                     //..................Prints to output file.
                     stringstream ss("");
-                    ss << "\t<nuclide_concentrations zone=\"" << zone.attribute("name").value() << "\" amin = \"" << AMin << "\" amax=\"" << AMax << "\" total_nuclides=\"" << sol.species_names.size() << "\" time_step=\"" << t << "\">" << endl;
+                    ss << "\t<nuclide_concentrations zone=\"" 
+                        << zone.attribute("name").value() 
+                        << "\" amin = \"" << AMin 
+                        << "\" amax=\"" << AMax 
+                        << "\" total_nuclides=\"" << sol.species_names.size() 
+                        << "\" time_step=\"" << t << "\">" << endl;
+
                     for (string species : sol.species_names)
                     {
                         mpreal c = w[species];
-                        if (c > __eps__)
-                        {
-                            ss << "\t\t<concentration species=\"" << species << "\" value=\"" << scientific << setprecision(output_digits) << w[species] << "\" />" << endl;
-                        }
+                        ss << "\t\t<concentration species=\"" << species 
+                            << "\" value=\"" << scientific 
+                            << setprecision(output_digits) << w[species] 
+                            << "\" />" << endl;
+                       
                     }
                     ss << "\t</nuclide_concentrations>" << endl;
                     file << ss.str();
