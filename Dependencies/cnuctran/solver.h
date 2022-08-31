@@ -209,17 +209,17 @@ namespace cnuctran
                     
             smatrix converted_w0 = smatrix(pair<int, int>(this->__I__, 1), w0_matrix);
 
-            //..........Auto suggest the no. of Sparse Self Matrix Multiplication.
+//..........Auto suggest the no. of Sparse Self Matrix Multiplication.
             int k = int(floor(log(t / pow(mpreal("10"), -n)) / log(__two__)));
             if (__vbs__) cout << "Approximation order, n = " << n << endl;
 
-            //..........Compute the transfer matrix power.
+//..........Compute the transfer matrix power.
             if (__vbs__) cout << "Time step, T = " << t << endl;
             auto t1 = chrono::high_resolution_clock::now();
             smatrix T = this->prepare_transfer_matrix(t / pow(__two__, k));
 
             auto t2 = chrono::high_resolution_clock::now();
-            //..........Compute the matrix exponentiation and multiply with w0 to obtain w.
+//..........Compute the matrix exponentiation and multiply with w0 to obtain w.
             smatrix w = T.binpow(k).mul(converted_w0);
             auto t3 = chrono::high_resolution_clock::now();
             if (__vbs__) cout << "Done computing concentrations. ";
