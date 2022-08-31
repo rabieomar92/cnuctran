@@ -2,8 +2,9 @@
 
 
 CNUCTRAN is a C++ library created to simulate various nuclear transmutations such as decays, fissions, and neutron absorptions. Download CNUCTRAN user's manual here: https://github.com/rabieomar92/cnuctran/blob/main/cnuctran_manual.pdf
-<div align="justify">
+
 ## Features
+<div align="justify">
 
 - Friendly to all physicists! In order to understand the method implemented in CNUCTRAN, you only need to know <a href="https://en.wikipedia.org/wiki/Poisson_distribution" target=_blank>Poisson distribution</a> and <a href="https://en.wikipedia.org/wiki/Matrix_multiplication" target=_blank>matrix multiplications</a>! Free from math jargons, hard-to-understand algorithms and approximations.
 - Capable of simulating complex transmutation chains.
