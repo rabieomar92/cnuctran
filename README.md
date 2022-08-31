@@ -1,7 +1,7 @@
 # CNUCTRAN: A C++ nuclides depletion solver based on the probabilistic method.
 
 <div align="justify">
-CNUCTRAN is a C++ library created to simulate various nuclear transmutations such as decays, fissions, and neutron absorptions. Download CNUCTRAN user's manual here: https://github.com/rabieomar92/cnuctran/edit/main/cnuctran_manual.pdf
+CNUCTRAN is a C++ library created to simulate various nuclear transmutations such as decays, fissions, and neutron absorptions. Download CNUCTRAN user's manual here: https://github.com/rabieomar92/cnuctran/main/cnuctran_manual.pdf
 
 ## Features
 
