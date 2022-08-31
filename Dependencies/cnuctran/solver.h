@@ -56,7 +56,12 @@ namespace cnuctran
         const mpreal __zer__ = mpreal("0.0");
         vector<string> species_names;
         int __I__;
+
+        // lambdas is a 2D vector storing the transmutation constants for all nuclides.
+        // Its row corresponds to the various nuclide and its column corresponds to the various removal types.
         vector<vector<mpreal>> lambdas;
+
+        // G is a 2D vector storing the transmutation products ID. The ID maps to the nuclide stored in species_names.
         vector<vector<vector<int>>> G;
         vector<vector<mpreal>> fission_yields;
 
@@ -83,8 +88,8 @@ namespace cnuctran
         {
 
 
-            //..........Skips adding a removal if the removal rate is outside of the range
-            //          specified by the input file.
+//..........Skips adding a removal if the removal rate is outside of the range
+//          specified by the input file.
             if (rate < __mnr__ || rate > __mxr__)
                 return;
 
@@ -138,19 +143,19 @@ namespace cnuctran
             {
                     
 
-                //..............Clears the exponentials container, e, and retrieves the total number of
-                //              events associated to nuclide-i.
+//..............Clears the exponentials container, e, and retrieves the total number of
+//              events associated to nuclide-i.
                 e.clear();
                 const int n_events = this->G[i].size();
 
 
-                //..............Precalculate the exponentials.
+//..............Precalculate the exponentials.
                 mpreal norm = __zer__;
 
                 for (int l = 1; l < n_events; l++)
                     e.emplace(l - 1, exp(-this->lambdas[i][l - 1] * dt));
 
-                //..............Constructs the pi-distribution.
+//..............Constructs the pi-distribution.
                 for (int j = 0; j < n_events; j++)
                 {
 
@@ -166,13 +171,13 @@ namespace cnuctran
                 if (norm == __zer__)
                     continue;
 
-                //..............Constructs the transfer matrix.
+//..............Constructs the transfer matrix.
                 auto const& gI = G[i];
                 for (int j = 0; j < n_events; j++)
                 {
 
                     auto const& a = (P[i][j] / norm);
-                    auto const gJ = gI[j];
+                    auto const& gJ = gI[j];
                     int n_daughters = gJ.size();
                     for (int l = 0; l < n_daughters; l++)
                     {
@@ -192,6 +197,7 @@ namespace cnuctran
             return smatrix({ this->__I__, this->__I__ }, A);
         }
 
+
         map<string, mpreal> solve(map<string, mpreal> w0,
             mpreal n,
             mpreal t)
@@ -203,7 +209,7 @@ namespace cnuctran
                     
             smatrix converted_w0 = smatrix(pair<int, int>(this->__I__, 1), w0_matrix);
 
-            //..........Auto suggest the no. of substeps.
+            //..........Auto suggest the no. of Sparse Self Matrix Multiplication.
             int k = int(floor(log(t / pow(mpreal("10"), -n)) / log(__two__)));
             if (__vbs__) cout << "Approximation order, n = " << n << endl;
 
