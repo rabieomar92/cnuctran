@@ -333,8 +333,11 @@ namespace cnuctran {
                 int nzones = 0;
                 //Initialize file stream of the output file (output.xml).
                 ofstream file;
+                ofstream file_out;
                 file.open(output_location, ios::out);
+                file_out.open(output_location + ".out", ios::out);
                 file << "<output>" << endl;
+                file_out << setw(8) << "Species" << setw(output_digits + 10) << "Concentration" << setw(10) << "Non-zero" << endl;
 
                 //Loop over all relevant XML child nodes for each zone.
                 for (xml_node zone : root.children())
@@ -454,6 +457,7 @@ namespace cnuctran {
 
                     //..................Prints to output file.
                     stringstream ss("");
+                    stringstream ss_out("");
                     ss << "\t<nuclide_concentrations zone=\"" 
                         << zone.attribute("name").value() 
                         << "\" amin = \"" << AMin 
@@ -466,11 +470,17 @@ namespace cnuctran {
                         mpreal c = w[species];
                         ss << "\t\t<concentration species=\"" << species 
                             << "\" value=\"" << scientific 
-                            << setprecision(output_digits) << w[species] 
+                            << setprecision(output_digits) << c 
                             << "\" />" << endl;
-                       
+                        if (w[species] > mpreal("0.0"))
+                            ss_out << setw(8) << species << setw(output_digits + 10) << scientific
+                                << setprecision(output_digits) << c << setw(10) << "yes" << endl;
+                        else
+                            ss_out << setw(8) << species << setw(output_digits + 10) << scientific
+                            << setprecision(output_digits) << c << setw(10) << "" << endl;
                     }
                     ss << "\t</nuclide_concentrations>" << endl;
+                    file_out << ss_out.str();
                     file << ss.str();
 
                 }
@@ -478,6 +488,7 @@ namespace cnuctran {
                 //Closes the output file stream.
                 file << "</output>" << endl;
                 file.close();
+                file_out.close();
 
 
             }
