@@ -337,8 +337,7 @@ namespace cnuctran {
                 file.open(output_location, ios::out);
                 file_out.open(output_location + ".out", ios::out);
                 file << "<output>" << endl;
-                file_out << setw(8) << "Species" << setw(output_digits + 10) << "Concentration" << setw(10) << "Non-zero" << endl;
-
+                
                 //Loop over all relevant XML child nodes for each zone.
                 for (xml_node zone : root.children())
                 {
@@ -465,6 +464,17 @@ namespace cnuctran {
                         << "\" total_nuclides=\"" << sol.species_names.size() 
                         << "\" time_step=\"" << t << "\">" << endl;
 
+                    file_out << "CNUCTRAN v1.1 OUTPUT. All values are in their corresponding SI unit." << endl;
+                    file_out << setw(20) << left << "time-step" << "= " << scientific << t << endl;
+                    file_out << setw(20) << left << "order (n)" << "= " << (int)n.toFloat() << endl;
+                    file_out << setw(20) << left << "total nuclides" << "= " << w.size() << endl;
+                    int k = int(floor(log(t / pow(mpreal("10"), -n)) / log(mpreal("2.0"))));
+                    mpreal dt = t / pow(mpreal("2.0"), k);
+                    file_out << setw(20) << left << "substep" << "= " << scientific << dt << " (" << k << " sparse mults.)" << endl;
+                    file_out << setw(20) << left << "precision" << "= " << precision_digits << " digits." << endl;
+
+                    file_out << setw(8) << left << "Species" << setw(10) << left << "Non-zero" << setw(output_digits + 10) << left << "Concentration" << endl;
+
                     for (string species : sol.species_names)
                     {
                         mpreal c = w[species];
@@ -473,11 +483,11 @@ namespace cnuctran {
                             << setprecision(output_digits) << c 
                             << "\" />" << endl;
                         if (w[species] > mpreal("0.0"))
-                            ss_out << setw(8) << species << setw(output_digits + 10) << scientific
-                                << setprecision(output_digits) << c << setw(10) << "yes" << endl;
+                            ss_out << setw(8) << left << species << " " << setw(10) << left << "yes" << setw(output_digits + 10) << scientific
+                                << setprecision(output_digits) << left << c << endl;
                         else
-                            ss_out << setw(8) << species << setw(output_digits + 10) << scientific
-                            << setprecision(output_digits) << c << setw(10) << "" << endl;
+                            ss_out << setw(8) << left << species << " " << setw(10) << left << "" << setw(output_digits + 10) << scientific
+                            << setprecision(output_digits) << left << c << endl;
                     }
                     ss << "\t</nuclide_concentrations>" << endl;
                     file_out << ss_out.str();
