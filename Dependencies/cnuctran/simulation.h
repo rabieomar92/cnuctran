@@ -41,6 +41,11 @@ namespace cnuctran {
 
     public:
 
+        /*
+            This sub-routine reads nuclide transmutation information from the XML 
+            nuclides data library.
+
+        */
         static void build_chains(solver& s, map<string, map<string, mpreal>>& rxn_rates,
             string xml_data_location)
         {
@@ -51,7 +56,7 @@ namespace cnuctran {
             xml_parse_result open_success = file.load_file(xml_data_location.c_str());
             if (!open_success)
             {
-                cout << "ERROR <cnuctran.depletion_scheme.build_chains(...)>\n\nFail retrieving data from " << xml_data_location << "." << endl;
+                cout << "INFO\t<cnuctran::depletion_scheme::build_chains(...)> Nuclides data file is not provided." << endl;
                 return;
             }
 
@@ -61,7 +66,7 @@ namespace cnuctran {
             for (xml_node species : root.children())
             {
                 string species_name = species.attribute("name").value();
-                auto it = find(species_names.begin(), species_names.end(), species_name);
+                vector<string>::iterator it = std::find(species_names.begin(), species_names.end(), species_name);
                 if (it == species_names.end())
                     continue;
 
@@ -79,9 +84,9 @@ namespace cnuctran {
                         mpreal decay_rate_adjusted = mpreal(removal.attribute("branching_ratio").value()) * decay_rate;
                         string parent = species_name;
                         string daughter = removal.attribute("target").value();
-                        auto it_parent = find(species_names.begin(), species_names.end(), parent);
+                        vector<string>::iterator it_parent = std::find(species_names.begin(), species_names.end(), parent);
                         int parent_id = distance(species_names.begin(), it_parent);
-                        auto it_daughter = find(species_names.begin(), species_names.end(), daughter);
+                        vector<string>::iterator it_daughter = std::find(species_names.begin(), species_names.end(), daughter);
                         if (it_daughter != species_names.end())
                         {
                             int daughter_id = distance(species_names.begin(), it_daughter);
@@ -101,14 +106,14 @@ namespace cnuctran {
                             if (string(removal.name()) == "reaction_type" && removal.attribute("target"))
                             {
                                 string parent = species_name;
-                                auto it_parent = find(species_names.begin(), species_names.end(), parent);
+                                vector<string>::iterator it_parent = std::find(species_names.begin(), species_names.end(), parent);
                                 int parent_id = distance(species_names.begin(), it_parent);
                                 if (rxn_rates[parent].count(removal.attribute("type").value()) &&
                                     removal.attribute("type").value() != "fission")
                                 {
                                     string daughter = removal.attribute("target").value();
                                     mpreal removal_rate = mpreal(rxn_rates[parent][removal.attribute("type").value()]);
-                                    auto it_daughter = find(species_names.begin(), species_names.end(), daughter);
+                                    vector<string>::iterator it_daughter = std::find(species_names.begin(), species_names.end(), daughter);
                                     if (it_daughter != species_names.end())
                                     {
                                         int daughter_id = distance(species_names.begin(), it_daughter);
@@ -124,7 +129,7 @@ namespace cnuctran {
                             if (string(removal.name()) == "neutron_fission_yields")
                             {
                                 string parent = species_name;
-                                auto it_parent = find(species_names.begin(), species_names.end(), parent);
+                                vector<string>::iterator it_parent = std::find(species_names.begin(), species_names.end(), parent);
                                 int parent_id = distance(species_names.begin(), it_parent);
                                 mpreal energy = mpreal("0");
                                 vector<string> products;
@@ -328,15 +333,14 @@ namespace cnuctran {
                 tmp != "" ? output_location = tmp : output_location = ".//output.xml";
                 if (__vbs__) cout << "Final nuclide concentrations will be written in " << output_location << endl;
 
-
-                //..............LOOP OVER ALL ZONES and read the species, initial concentrations and reaction rates (for the zone).
+//..............LOOP OVER ALL ZONES and read the species, initial concentrations and reaction rates (for the zone).
                 int nzones = 0;
                 //Initialize file stream of the output file (output.xml).
-                ofstream file;
+                ofstream file_xml;
                 ofstream file_out;
-                file.open(output_location, ios::out);
+                file_xml.open(output_location, ios::out);
                 file_out.open(output_location + ".out", ios::out);
-                file << "<output>" << endl;
+                file_xml << "<output>" << endl;
                 
                 //Loop over all relevant XML child nodes for each zone.
                 for (xml_node zone : root.children())
@@ -348,27 +352,14 @@ namespace cnuctran {
                     // Reads the species names.
                     if (!zone.child("species")) throw (int)errex::MISSING_SPECIES_NAMES;
                     vector<string> species_names;
-                    string species = zone.child("species").child_value();
+                    auto species = zone.child("species").child_value();
                     if (strlen(zone.child("species").attribute("amin").value()) > 0) {
                         xml_document source;
-                        xml_parse_result open_success = source.load_file(zone.child("species").attribute("source").value());
+                        auto open_success = source.load_file(zone.child("species").attribute("source").value());
                         if (open_success)
-                        {
-
-                            if (strlen(zone.child("species").attribute("amin").value()) > 0)
-                                AMin = stoi(zone.child("species").attribute("amin").value());
-                            else
-                            {
-                                cout << "warning <cnuctran.simulation.from_input()>\nAMin attribute is missing. Considering all nuclides with A > 0." << endl;
-                                AMin = 0;
-                            }
-                            if (strlen(zone.child("species").attribute("amax").value()) > 0)
-                                AMax = stoi(zone.child("species").attribute("amax").value());
-                            else
-                            {
-                                cout << "warning <cnuctran.simulation.from_input()>\nAMin attribute is missing. Considering all nuclides with A > 0." << endl;
-                                AMax = 400;
-                            }
+                        {   
+                            AMax = strlen(zone.child("species").attribute("amax").value()) > 0 ? stoi(zone.child("species").attribute("amax").value()) : 400;
+                            AMin = strlen(zone.child("species").attribute("amin").value()) > 0 ? stoi(zone.child("species").attribute("amin").value()) : 0;
                             species_names = get_nuclide_names(zone.child("species").attribute("source").value(), AMin, AMax);
                             if (__vbs__) cout << "Building chains... A = [" << AMin << "," << AMax << "]. Total no. of nuclides = " << species_names.size() << endl;
                         }
@@ -384,16 +375,17 @@ namespace cnuctran {
                             token.erase(remove_if(token.begin(), token.end(), ispunct), token.end());
                             if (token != "") species_names.push_back(trim(token));
                         }
+                        if (__vbs__) cout << "Building chains... Total no. of nuclides = " << species_names.size() << endl;
                     }
 
-                    //..................Reads the initial concentrations for each zone.
+//..................Reads the initial concentrations for each zone.
                     map<string, mpreal> w0;
                     const char* w0_source = zone.child("initial_concentrations").attribute("source").value();
                     const char* override_species_names = zone.child("initial_concentrations").attribute("override").value();
                     if (w0_source != "")
                     {
                         xml_document w0_doc;
-                        xml_parse_result load_success = w0_doc.load_file(w0_source);
+                        auto load_success = w0_doc.load_file(w0_source);
                         if (override_species_names == "true") species_names.clear();
                         if (load_success)
                         {
@@ -406,8 +398,8 @@ namespace cnuctran {
                                 for (xml_node nuclide : concs)
                                 {
                                     if (string(nuclide.name()) != "concentration") continue;
-                                    string name = nuclide.attribute("species").value();
-                                    mpreal concentration = mpreal(nuclide.attribute("value").value());
+                                    auto name = nuclide.attribute("species").value();
+                                    auto concentration = mpreal(nuclide.attribute("value").value());
                                     if (override_species_names == "true")
                                     {
                                         species_names.push_back(name);
@@ -439,65 +431,62 @@ namespace cnuctran {
                         }
                     }
 
-                    //..................Reads the rxn rates.
+//..................Reads the rxn rates.
                     map<string, map<string, mpreal>> rxn_rates;
 
                     for (xml_node reaction : zone.child("reaction_rates").children())
                     {
                         mpreal rate = mpreal(reaction.attribute("rate").value());
-                        rxn_rates[reaction.attribute("species").value()][reaction.attribute("type").value()] = rate;
-                        
+                        rxn_rates[reaction.attribute("species").value()][reaction.attribute("type").value()] = rate; 
                     }
 
-                    //..................Runs the simulation.
+//ATTENTION!........This is where the code solves for nuclides concentrations.
                     solver sol = solver(species_names);
                     build_chains(sol, rxn_rates, zone.child("species").attribute("source").value());
                     auto w = sol.solve(w0, n, t);
 
-                    //..................Prints to output file.
-                    stringstream ss("");
+//..................Prints to output file.
+                    stringstream ss_xml("");
                     stringstream ss_out("");
-                    ss << "\t<nuclide_concentrations zone=\"" 
-                        << zone.attribute("name").value() 
-                        << "\" amin = \"" << AMin 
-                        << "\" amax=\"" << AMax 
-                        << "\" total_nuclides=\"" << sol.species_names.size() 
-                        << "\" time_step=\"" << t << "\">" << endl;
+                    ss_xml << "\t<nuclide_concentrations zone=\"" 
+                           << zone.attribute("name").value() 
+                           << "\" amin = \"" << AMin 
+                           << "\" amax=\"" << AMax 
+                           << "\" total_nuclides=\"" << sol.species_names.size() 
+                           << "\" time_step=\"" << t << "\">" << endl;
 
-                    file_out << "CNUCTRAN v1.1 OUTPUT. All values are in their corresponding SI unit." << endl;
-                    file_out << setw(20) << left << "time-step" << "= " << scientific << t << endl;
+                    file_out << "CNUCTRAN v1.1 OUTPUT." << endl;
+                    file_out << setw(20) << left << "time step" << "= " << scientific << t << "s" << endl;
                     file_out << setw(20) << left << "order (n)" << "= " << (int)n.toFloat() << endl;
                     file_out << setw(20) << left << "total nuclides" << "= " << w.size() << endl;
                     int k = int(floor(log(t / pow(mpreal("10"), -n)) / log(mpreal("2.0"))));
                     mpreal dt = t / pow(mpreal("2.0"), k);
-                    file_out << setw(20) << left << "substep" << "= " << scientific << dt << " (" << k << " sparse mults.)" << endl;
+                    file_out << setw(20) << left << "substep" << "= " << scientific << dt << "s (" << k << " sparse mults.)" << endl;
                     file_out << setw(20) << left << "precision" << "= " << precision_digits << " digits." << endl;
-
                     file_out << setw(8) << left << "Species" << setw(10) << left << "Non-zero" << setw(output_digits + 10) << left << "Concentration" << endl;
 
                     for (string species : sol.species_names)
                     {
                         mpreal c = w[species];
-                        ss << "\t\t<concentration species=\"" << species 
+                        ss_xml << "\t\t<concentration species=\"" << species 
                             << "\" value=\"" << scientific 
                             << setprecision(output_digits) << c 
                             << "\" />" << endl;
-                        if (w[species] > mpreal("0.0"))
-                            ss_out << setw(8) << left << species << " " << setw(10) << left << "yes" << setw(output_digits + 10) << scientific
-                                << setprecision(output_digits) << left << c << endl;
-                        else
-                            ss_out << setw(8) << left << species << " " << setw(10) << left << "" << setw(output_digits + 10) << scientific
-                            << setprecision(output_digits) << left << c << endl;
+                        ss_out << setw(8) << left << species << " " << setw(10);
+                        w[species] > mpreal("0.0") ? ss_out << left << "yes" : ss_out << "";
+                        ss_out << setw(output_digits + 10) << scientific
+                               << setprecision(output_digits) << left << c << endl;
+
                     }
-                    ss << "\t</nuclide_concentrations>" << endl;
+                    ss_xml << "\t</nuclide_concentrations>" << endl;
                     file_out << ss_out.str();
-                    file << ss.str();
+                    file_xml << ss_xml.str();
 
                 }
 
                 //Closes the output file stream.
-                file << "</output>" << endl;
-                file.close();
+                file_xml << "</output>" << endl;
+                file_xml.close();
                 file_out.close();
 
 
