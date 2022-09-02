@@ -111,7 +111,7 @@ namespace cnuctran
                     }
                     r[p.first] = c;
 
-                }, auto_partitioner());
+                });
 
             return result;
 
