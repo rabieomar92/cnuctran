@@ -81,12 +81,15 @@ namespace cnuctran
             return;
         }
 
+        /*
+            ADD_REMOVAL
+            This subroutine defines the removal event of a nuclide.
+        */
         void add_removal(int species_index,
             mpreal rate,
             vector<int> products,
             vector<mpreal> fission_yields = vector<mpreal>({}))
         {
-
 
 //..........Skips adding a removal if the removal rate is outside of the range
 //          specified by the input file.
@@ -117,7 +120,7 @@ namespace cnuctran
                 for (int product : products)
                 {
                     // This part is for preparing the transmutation matrix, which is not relevant 
-                    // for this C++ version, cnuctran. For CRAM calculation, please use the PyNUCTRAN.
+                    // for this C++ version, cnuctran.
                 }
             }
             else
@@ -131,6 +134,10 @@ namespace cnuctran
             }
         }
 
+        /*
+            PREPARE_TRANSFER_MATRIX
+            This function returns the transfer matrix, P, in Eq. (17) of CNUCTRAN manual.
+        */
         smatrix prepare_transfer_matrix(mpreal dt)
         {
             cmap_2d A;
@@ -155,7 +162,7 @@ namespace cnuctran
                 for (int l = 1; l < n_events; l++)
                     e.emplace(l - 1, exp(-this->lambdas[i][l - 1] * dt));
 
-//..............Constructs the pi-distribution.
+//..............Constructs the pi-distribution according to Eq. (12) if CNUCTRAN manual.
                 for (int j = 0; j < n_events; j++)
                 {
 
@@ -171,7 +178,7 @@ namespace cnuctran
                 if (norm == __zer__)
                     continue;
 
-//..............Constructs the transfer matrix.
+//..............Constructs the transfer matrix according to Eq. (15) of CNUCTRAN manual.
                 auto const& gI = G[i];
                 for (int j = 0; j < n_events; j++)
                 {
@@ -198,6 +205,10 @@ namespace cnuctran
         }
 
 
+        /*
+            SOLVE
+            This function solves the final nuclides concentration according to Eq. (18) of CNUCTRAN manual.
+        */
         map<string, mpreal> solve(map<string, mpreal> w0,
             mpreal n,
             mpreal t)
@@ -209,17 +220,17 @@ namespace cnuctran
                     
             smatrix converted_w0 = smatrix(pair<int, int>(this->__I__, 1), w0_matrix);
 
-//..........Auto suggest the no. of Sparse Self Matrix Multiplication.
+            //..........Auto suggest the no. of Sparse Self Matrix Multiplication.
             int k = int(floor(log(t / pow(mpreal("10"), -n)) / log(__two__)));
             if (__vbs__) cout << "Approximation order, n = " << n << endl;
 
-//..........Compute the transfer matrix power.
+            //..........Compute the transfer matrix power.
             if (__vbs__) cout << "Time step, T = " << t << endl;
             auto t1 = chrono::high_resolution_clock::now();
             smatrix T = this->prepare_transfer_matrix(t / pow(__two__, k));
 
             auto t2 = chrono::high_resolution_clock::now();
-//..........Compute the matrix exponentiation and multiply with w0 to obtain w.
+            //..........Compute the matrix exponentiation and multiply with w0 to obtain w.
             smatrix w = T.binpow(k).mul(converted_w0);
             auto t3 = chrono::high_resolution_clock::now();
             if (__vbs__) cout << "Done computing concentrations. ";
