@@ -58,21 +58,6 @@
 			<reaction species="U238" type="fission" rate="1e-5" />
 		</reaction_rates>
 		
-		<removals>
-			<removal rate="1.027082E-14" parent="Np237" daughters="Pa233" yields="1.0" />
-			<removal rate="2.971055E-07" parent="Pa233" daughters="U233" yields="1.0" />
-			<removal rate="1.380625E-13" parent="U233" daughters="Th229" yields="1.0" />
-			<removal rate="2.994544E-12" parent="Th229" daughters="Ra225" yields="1.0" />
-			<removal rate="5.384253E-07" parent="Ra225" daughters="Ac225" yields="1.0" />
-			<removal rate="8.022537E-07" parent="Ac225" daughters="Fr221" yields="1.0" />
-			<removal rate="2.406761E-03" parent="Fr221" daughters="At217" yields="1.0" />
-			<removal rate="2.166085E+02" parent="At217" daughters="Bi213" yields="1.0" />
-			<removal rate="0.00000519239" parent="Bi213" daughters="Tl209" yields="1.0" />
-			<removal rate="0.00024324741" parent="Bi213" daughters="Po213" yields="1.0" />
-			<removal rate="1.863299E+05" parent="Po213" daughters="Pb209" yields="1.0" />
-			<removal rate="5.251115E-03" parent="Tl209" daughters="Pb209" yields="1.0" />
-			<removal rate="5.924335E-05" parent="Pb209" daughters="Bi209" yields="1.0" />
-		</removals>
 	</zone>
 
   <!-- Simulation parameters. -->
