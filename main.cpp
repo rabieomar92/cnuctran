@@ -1,7 +1,5 @@
-﻿
 #include <simulation.h>
 #include <iostream>
-
 
 using namespace cnuctran;
 
