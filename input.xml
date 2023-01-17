@@ -2,54 +2,14 @@
 
 <problem>
 
-  <!-- Calculation zones. -->
+  	<!-- Calculation zones. -->
 	<zone name="myzone">
-		<!--
-			 ZONE DEFINITIONS.
-			 
-			 Each zone has its own problem definition. For instance, a reactor fuel pin can be considered as
-			 a zone. Users are allowed to define as many zones as they wish.
-	
-		-->
 		
-		<species>
-			<!--
-				SPECIES DEFINITIONS.
-			
-				Each zone must have a list of species names to enable the calculation.
-
-				DATA SOURCE.
-				The user can provide the nuclides data via the following attribute:
-				<species source=".\nuclides\data\source\location"></species>
-
-				SPECIES NAME SPECIFICATION.
-				The user may specify the names manually, OR, specify the range of species names:
-				
-				For example, if the user wishes to include all nuclides with atomic number within
-				[100,300], then add the following attribute,
-				
-    				<species source="nuclides\data\source\" amin="100" amax="300">...</species>
-
-				However, the nuclides data source file must be specified. Specifying amin and amax 
-				attributes will ignore the species names listed in the species node. 
-			-->
-				
+		<species source="chain_endfb71.xml">
 			Np237 Pa233 U233 Th229 Ra225 Ac225 Fr221 At217 Bi213 Po213 Tl209 Pb209 Bi209
 		</species>
 		
 		<initial_concentrations>
-			<!--
-				INITIAL CONCENTRATIONS SPECIFICATION.
-				
-				The user may define the initial concentration of each individual nuclide manually via
-				the <n0 species="species_name" value="#####" /> tag.
- 				The user can also import the previously calculated concentrations stored in an XML file.
-				Note that the output XML of the previous calculations can serve as the initial concentration
-				source file. To import the existing concentration file, the following attribute must exist,
-
-				<initial_concentrations source=".\path\to\initial\concentration\file.xml"></initial_concentrations>
-			-->
-			
 			<concentration species="Np237" value="1.0" />
 		</initial_concentrations>
 		
@@ -60,32 +20,13 @@
 		
 	</zone>
 
-  <!-- Simulation parameters. -->
+  	<!-- Simulation parameters. -->
 	<simulation_params>
-		<!-- 
-		
-			 SIMULATION PARAMETERS DESCRIPTION.
-			 
-			 n is the order of the calculation. This simply means that the substep size is below 10^-n sec.
-			 time_step is the time step of the calculation.
-			 precision_digits is the minimum number of accurate digits maintained in the arithmetics.
-			 output_digits is the number of decimal points to be displayed in the output.
-			 verbosity is the verbosity level. A higher verbosity means more console output messages will be displayed.
-			 output is the location of the output file on the disk.
-			 max_rate is the maximum removal rate to be considered in the calculation.*
-			 min_rate is the minimum removal rate to be considered in the calculation.**
-			 
-			 *Any removal rates that fall above max_rate will be ignored by the program.
-			 **Any removal rates that fall below min_rate will be ignored by the program.
-			 
-		-->
 		<n>12</n>
 		<time_step>31556952000000</time_step>
 		<precision_digits>40</precision_digits>
 		<output_digits>15</output_digits>
 		<verbosity>2</verbosity>
 		<output>.\output.xml</output>
-		<max_rate>1000000000</max_rate>
-		<min_rate>1e-200</min_rate>
 	</simulation_params>
 </problem>
