@@ -2,10 +2,11 @@
 
       This file is part of the CNUCTRAN library
 
+      @author   M. R. Omar (rabieomar@usm.my)
       @license  MIT
       @link     https://github.com/rabieomar92/cnuctran
 
-      Copyright (c) 2022 M. R. Omar
+      Copyright (c) 2023, Universiti Sains Malaysia
 
       This header file contains the definitions of all methods for preparing
       the simulation associated to the proposed probabilistic method.
