@@ -2,6 +2,7 @@
 
       This file is part of the CNUCTRAN library
 
+      @author   M. R. Omar (rabieomar@usm.my)
       @license  MIT
       @link     https://github.com/rabieomar92/cnuctran
 
