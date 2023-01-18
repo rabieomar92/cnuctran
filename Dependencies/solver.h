@@ -5,7 +5,7 @@
       @license  MIT
       @link     https://github.com/rabieomar92/cnuctran
 
-      Copyright (c) 2022 M. R. Omar
+      Copyright (c) 2023, Universiti Sains Malaysia.
 
       This header file contains the definitions of all reusable computational 
       routines of the proposed probabilistic method, which is implemented in
