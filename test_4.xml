@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+
+<!-- 
+	Test 4: U-238 transmutations (A) without fission (B) with fission. 
+	------------------------------------------------------------------
+	This test is adapted from D. Lago, F. Rahnema, Development of a set of benchmark
+	problems to verify numerical methods for solving burnup equations, Annals of 
+	Nuclear Energy 99 (2017) 266–271. doi: https://doi.org/10.1016/j.anucene.2016.09.004.
+	URL https://www.sciencedirect.com/science/article/pii/S0306454916304558
+
+
+	All nuclides with A=150 to A=244 are included. 
+	The time step is 1 day (86400.0 seconds).
+	
+-->
+
+<problem>
+
+	<zone name="myzone">
+		<species source="chain_endfb71.xml" amin="150" amax="244" />
+
+		<initial_concentrations>
+			<concentration species="U238" value="1E10" />
+			<concentration species="U239" value="1E3" />
+		</initial_concentrations>
+		<reaction_rates>
+		    <!-- Uncomment the xml tag below to enable the fission of U-238 -->
+			<!--reaction species="U238" type="fission" rate="1E-5"/ -->
+			<reaction species="U238" type="(n,gamma)" rate="1E-4"/>
+			<reaction species="Pu239" type="(n,gamma)" rate="1E-4"/>
+			<reaction species="Pu240" type="(n,gamma)" rate="1E-4"/>
+			<reaction species="Pu241" type="(n,gamma)" rate="1E-4"/>
+			<reaction species="Pu242" type="(n,gamma)" rate="1E-4"/>
+			<reaction species="Am243" type="(n,gamma)" rate="1E-4"/>
+		</reaction_rates>
+	</zone>
+	
+	<!-- Simulation parameters. -->
+	<simulation_params>
+		<n>20</n>
+		<time_step>86400.0</time_step>
+		<precision_digits>50</precision_digits>
+		<output_digits>20</output_digits>
+		<verbosity>1</verbosity>
+		<output>.\output.xml</output>
+	</simulation_params>
+
+</problem>

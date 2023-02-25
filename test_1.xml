@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+
+<!-- 
+	Test 1: Simple 2-nuclide problem.
+    ---------------------------------
+
+	The initial concentration of U238 is 1E12 nuclei.
+	The time step is 1E+17 seconds.
+	
+-->
+
+<problem>
+
+	<zone name="myzone">
+		<species source="chain_endfb71.xml">
+			U238 Th234
+		</species>
+
+		<initial_concentrations>
+			<concentration species="U238" value="1E12" />
+		</initial_concentrations>
+		<reaction_rates>
+			<!-- No reaction for this test case.-->
+		</reaction_rates>
+	</zone>
+	
+	<!-- Simulation parameters. -->
+	<simulation_params>
+		<n>20</n>
+		<time_step>5E17</time_step>
+		<precision_digits>50</precision_digits>
+		<output_digits>20</output_digits>
+		<verbosity>1</verbosity>
+		<output>.\output.xml</output>
+	</simulation_params>
+
+</problem>

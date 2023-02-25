@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+
+<!-- 
+	Test 3: Np-237 pure decay chain. 
+	--------------------------------
+	This test is adapted from Y. Cai, X. Peng, Q. Li, L. Du, L. Yang, Solving point 
+	burnup equations by magnus method, Nuclear Engineering and Technology 51 (2019)
+	949–953. doi:https://doi.org/10.1016/j.net.2019.01.006.
+	URL https://www.sciencedirect.com/science/article/pii/S1738573318308787
+
+
+	All nuclides with A=209 to A=237 are included. 
+	The initial concentration of Np-237 is 1.0 mol.
+	The time step is ~1 million years (31537110285757.0 seconds).
+	
+-->
+
+<problem>
+
+    <zone name="myzone">
+		<species source="chain_endfb71.xml" amin="209" amax="237" />
+
+		<initial_concentrations>
+			<concentration species="Np237" value="1.0" />
+		</initial_concentrations>
+		<reaction_rates>
+			<!--reaction species="U238" type="(n,gamma)" rate="1E-4"/ -->
+		</reaction_rates>
+	</zone>
+	
+	<!-- Simulation parameters. -->
+	<simulation_params>
+		<n>20</n>
+		<time_step>31537110285757.0</time_step>
+		<precision_digits>50</precision_digits>
+		<output_digits>20</output_digits>
+		<verbosity>1</verbosity>
+		<output>.\output.xml</output>
+	</simulation_params>
+
+</problem>

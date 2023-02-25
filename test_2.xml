@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+
+<!-- 
+	Test 2: Po-210 buildup in MYRRHA eutectic Pb-Bi coolant 
+	-------------------------------------------------------
+	This test is adapted from A. Stankovskiy, G. V. den Eynde, Advanced method for calculations 
+	of core burn-up, activation of structural materials, and spallation products accumulation in 
+	accelerator-driven systems, Science and Technology of Nuclear Installations 2012 (2012) 545103.
+	doi:10.1155/2012/545103. URL https://doi.org/10.1155/2012/545103
+
+	The initial concentration of Bi209 is 0.0165368 mol.
+	Bi-209 experience (n,gamma) reaction with rate constant 2.09E-11 per second.
+	The time step is 90 days (7776000.0 seconds).
+	
+-->
+
+<problem>
+
+	<zone name="myzone">
+		<species source="chain_endfb71.xml">
+			Bi209 Bi210 Po210 Pb206
+		</species>
+
+		<initial_concentrations>
+			<concentration species="Bi209" value=" 0.0165368" />
+		</initial_concentrations>
+		<reaction_rates>
+			<reaction species="Bi209" type="(n,gamma)" rate="2.09E-11" />
+		</reaction_rates>
+	</zone>
+	
+	<!-- Simulation parameters. -->
+	<simulation_params>
+		<n>20</n>
+		<time_step>7776000.0</time_step>
+		<precision_digits>50</precision_digits>
+		<output_digits>20</output_digits>
+		<verbosity>1</verbosity>
+		<output>.\output.xml</output>
+	</simulation_params>
+
+</problem>
